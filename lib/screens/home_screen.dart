@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/theme.dart';
 import '../constants/strings.dart';
+import 'profile_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -66,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const Center(child: Text('Events Screen')), // Placeholder for Events Screen
       _buildDummyScannerScreen(),
       const Center(child: Text('Check-in History Screen')), // Placeholder for Check-in History Screen
-      const Center(child: Text('Account Screen')), // Placeholder for Account Screen
+      const ProfileScreen(), // Account Screen
     ];
 
     return Scaffold(
