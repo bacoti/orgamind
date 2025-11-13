@@ -364,3 +364,183 @@ class CustomAlertDialog extends StatelessWidget {
     );
   }
 }
+
+/// Enhanced Custom Text Field dengan real-time validation dan status icons
+class EnhancedTextField extends StatefulWidget {
+  final String label;
+  final String? hint;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final String? Function(String?)? realTimeValidator;
+  final TextInputType keyboardType;
+  final bool obscureText;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final int? maxLines;
+  final int? minLines;
+  final bool readOnly;
+  final void Function(String)? onChanged;
+  final FocusNode? focusNode;
+  final String? helperText;
+  final bool showStatusIcon;
+
+  const EnhancedTextField({
+    Key? key,
+    required this.label,
+    this.hint,
+    this.controller,
+    this.validator,
+    this.realTimeValidator,
+    this.keyboardType = TextInputType.text,
+    this.obscureText = false,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.maxLines = 1,
+    this.minLines,
+    this.readOnly = false,
+    this.onChanged,
+    this.focusNode,
+    this.helperText,
+    this.showStatusIcon = true,
+  }) : super(key: key);
+
+  @override
+  State<EnhancedTextField> createState() => _EnhancedTextFieldState();
+}
+
+class _EnhancedTextFieldState extends State<EnhancedTextField> {
+  late FocusNode _internalFocusNode;
+  String? _errorText;
+  bool _isValid = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _internalFocusNode = widget.focusNode ?? FocusNode();
+    _internalFocusNode.addListener(_handleFocusChange);
+  }
+
+  @override
+  void dispose() {
+    _internalFocusNode.removeListener(_handleFocusChange);
+    if (widget.focusNode == null) {
+      _internalFocusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    // Focus change handling if needed
+  }
+
+  void _validateRealTime(String value) {
+    if (widget.realTimeValidator != null) {
+      final error = widget.realTimeValidator!(value);
+      setState(() {
+        _errorText = error;
+        _isValid = error == null && value.isNotEmpty;
+      });
+    }
+  }
+
+  Widget? _getStatusIcon() {
+    if (!widget.showStatusIcon || _errorText == null && !_isValid) return null;
+
+    if (_errorText != null) {
+      return Icon(
+        Icons.error_outline,
+        color: AppColors.error,
+        size: 20,
+      );
+    } else if (_isValid) {
+      return Icon(
+        Icons.check_circle_outline,
+        color: AppColors.success,
+        size: 20,
+      );
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label
+        Text(
+          widget.label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.gray600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Text Field
+        TextFormField(
+          controller: widget.controller,
+          focusNode: _internalFocusNode,
+          validator: widget.validator,
+          keyboardType: widget.keyboardType,
+          obscureText: widget.obscureText,
+          maxLines: widget.obscureText ? 1 : widget.maxLines,
+          minLines: widget.minLines,
+          readOnly: widget.readOnly,
+          onChanged: (value) {
+            _validateRealTime(value);
+            widget.onChanged?.call(value);
+          },
+          style: const TextStyle(
+            color: AppColors.black,
+            fontSize: 16,
+          ),
+          decoration: InputDecoration(
+            hintText: widget.hint,
+            hintStyle: const TextStyle(
+              color: AppColors.gray400,
+              fontSize: 16,
+            ),
+            prefixIcon: widget.prefixIcon,
+            suffixIcon: widget.suffixIcon ?? _getStatusIcon(),
+            isDense: true,
+            contentPadding: (widget.maxLines != null && widget.maxLines! > 1)
+                ? const EdgeInsets.symmetric(vertical: 12, horizontal: 12)
+                : null,
+            errorStyle: const TextStyle(
+              fontSize: 13,
+              color: AppColors.error,
+              height: 1.2,
+            ),
+          ),
+        ),
+        // Error/Success Message
+        if (_errorText != null || (_isValid && widget.showStatusIcon))
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              _errorText ?? 'Valid',
+              style: TextStyle(
+                fontSize: 13,
+                color: _errorText != null ? AppColors.error : AppColors.success,
+                height: 1.2,
+              ),
+            ),
+          ),
+        // Helper Text
+        if (widget.helperText != null && _errorText == null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              widget.helperText!,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.gray400,
+                height: 1.2,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}

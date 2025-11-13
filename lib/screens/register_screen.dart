@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController _confirmPasswordController;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _acceptTerms = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -68,8 +69,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value == null || value.isEmpty) {
       return AppStrings.passwordRequired;
     }
-    if (value.length < 6) {
-      return AppStrings.passwordTooShort;
+    if (value.length < 8) {
+      return 'Kata sandi minimal 8 karakter';
+    }
+    if (!RegExp(r'[A-Za-z]').hasMatch(value) || !RegExp(r'[0-9]').hasMatch(value)) {
+      return 'Kata sandi harus mengandung huruf dan angka';
     }
     return null;
   }
@@ -83,6 +87,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return AppStrings.passwordNotMatch;
     }
     return null;
+  }
+
+  /// Handle Register Button Press
+  void _handleRegisterButton() {
+    if (_acceptTerms) {
+      _handleRegister();
+    } else {
+      // Show error for terms not accepted
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap setujui Syarat & Ketentuan terlebih dahulu'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   /// Handle Register
@@ -142,20 +161,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
-              SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+              const SizedBox(height: 32),
               Text(
-                AppStrings.register,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                'Daftar',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                  height: 1.2,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Buat akun baru untuk memulai!',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.gray600,
-                    ),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.gray600,
+                  height: 1.5,
+                ),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
@@ -165,34 +189,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   children: [
                     // Full Name Field
-                    CustomTextField(
-                      label: AppStrings.fullName,
+                    EnhancedTextField(
+                      label: 'Nama Lengkap',
                       hint: 'Nama Lengkap Anda',
                       controller: _nameController,
                       keyboardType: TextInputType.name,
                       validator: _validateName,
+                      realTimeValidator: (value) {
+                        if (value == null || value.isEmpty) return null;
+                        if (value.length < 3) return 'Nama minimal 3 karakter';
+                        return null;
+                      },
                       prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
                     // Email Field
-                    CustomTextField(
-                      label: AppStrings.email,
+                    EnhancedTextField(
+                      label: 'Email',
                       hint: 'contoh@email.com',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: _validateEmail,
+                      realTimeValidator: (value) {
+                        if (value == null || value.isEmpty) return null;
+                        final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                        if (!emailRegex.hasMatch(value)) return 'Format email tidak valid';
+                        return null;
+                      },
                       prefixIcon: const Icon(Icons.email_outlined),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
                     // Password Field
-                    CustomTextField(
-                      label: AppStrings.password,
+                    EnhancedTextField(
+                      label: 'Kata Sandi',
                       hint: '••••••••',
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       validator: _validatePassword,
+                      realTimeValidator: (value) {
+                        if (value == null || value.isEmpty) return null;
+                        if (value.length < 8) return 'Minimal 8 karakter';
+                        if (!RegExp(r'[A-Za-z]').hasMatch(value) || !RegExp(r'[0-9]').hasMatch(value)) {
+                          return 'Harus mengandung huruf dan angka';
+                        }
+                        return null;
+                      },
+                      helperText: 'Minimal 8 karakter dengan huruf & angka',
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -207,15 +251,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
                     // Confirm Password Field
-                    CustomTextField(
-                      label: AppStrings.confirmPassword,
+                    EnhancedTextField(
+                      label: 'Konfirmasi Kata Sandi',
                       hint: '••••••••',
                       controller: _confirmPasswordController,
                       obscureText: _obscureConfirmPassword,
                       validator: _validateConfirmPassword,
+                      realTimeValidator: (value) {
+                        if (value == null || value.isEmpty) return null;
+                        if (value != _passwordController.text) return 'Kata sandi tidak cocok';
+                        return null;
+                      },
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -231,14 +280,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 24),
+
+                    // Terms & Conditions Checkbox
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: _acceptTerms,
+                          onChanged: (value) {
+                            setState(() {
+                              _acceptTerms = value ?? false;
+                            });
+                          },
+                          activeColor: AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'Saya menyetujui ',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.gray700,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Syarat & Ketentuan',
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  // TODO: Add onTap for terms
+                                ),
+                                const TextSpan(text: ' serta '),
+                                TextSpan(
+                                  text: 'Kebijakan Privasi',
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  // TODO: Add onTap for privacy
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
                     // Register Button
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, child) {
                         return CustomElevatedButton(
                           label: AppStrings.register,
-                          onPressed: _handleRegister,
+                          onPressed: _handleRegisterButton,
                           isLoading: authProvider.isLoading,
                         );
                       },
@@ -247,7 +344,50 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
 
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              const SizedBox(height: 32),
+
+              // Divider
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: AppColors.gray300,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'atau',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.gray600,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color: AppColors.gray300,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Social Registration
+              CustomOutlinedButton(
+                label: 'Daftar dengan Google',
+                onPressed: () {
+                  // TODO: Implement Google sign up
+                },
+                icon: const Icon(Icons.g_mobiledata, size: 24),
+                borderColor: AppColors.gray300,
+                textColor: AppColors.gray700,
+              ),
+
+              const SizedBox(height: 32),
 
               // Login Link
               Row(
@@ -255,7 +395,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   Text(
                     AppStrings.alreadyHaveAccount,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.gray700,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   GestureDetector(
@@ -268,10 +411,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                     child: Text(
                       AppStrings.login,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
