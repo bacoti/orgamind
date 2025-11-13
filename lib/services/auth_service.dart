@@ -4,6 +4,7 @@ import '../models/user.dart';
 class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'user_data';
+  static const String _usersDbKey = 'users_database'; // Database semua user yang terdaftar
 
   late SharedPreferences _prefs;
 
@@ -24,10 +25,18 @@ class AuthService {
         final String token =
             'dummy_token_${DateTime.now().millisecondsSinceEpoch}';
 
+        // Cari user yang sudah terdaftar berdasarkan email
+        String? registeredName = _getUserNameFromStorage(email);
+        
+        // Jika user sudah pernah register, gunakan nama tersebut
+        // Jika belum pernah register, extract nama dari email
+        final String nameToUse = registeredName ?? 
+            email.split('@')[0].replaceAll('.', ' ').toUpperCase();
+
         // Create dummy user
         final User user = User(
           id: 'user_001',
-          name: 'John Doe',
+          name: nameToUse,
           email: email,
           phone: '08123456789',
         );
@@ -75,6 +84,9 @@ class AuthService {
         // Save token dan user data
         await _prefs.setString(_tokenKey, token);
         await _prefs.setString(_userKey, _userToJsonString(user));
+        
+        // Simpan mapping email ke nama untuk digunakan saat login nanti
+        await _prefs.setString('user_name_$email', name);
 
         return true;
       }
@@ -122,6 +134,18 @@ class AuthService {
   Future<void> logout() async {
     await _prefs.remove(_tokenKey);
     await _prefs.remove(_userKey);
+  }
+
+  // Helper: Get registered user name by email from storage
+  String? _getUserNameFromStorage(String email) {
+    try {
+      // Cari di semua SharedPreferences keys yang mengandung user data
+      // Gunakan key format: 'user_email_data' untuk menyimpan mapping email ke nama
+      final String? storedName = _prefs.getString('user_name_$email');
+      return storedName;
+    } catch (e) {
+      return null;
+    }
   }
 
   // Helper: Convert User to JSON string
