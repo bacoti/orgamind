@@ -5,6 +5,7 @@ import '../constants/strings.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/common_widgets.dart';
 import 'register_screen.dart';
+import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -78,8 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
         LoadingDialog.hide(context);
 
         if (success) {
-          // Navigate to home screen
-          // Akan dihandle oleh navigation logic di main.dart
+          // Navigate to home screen immediately after successful login
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
+          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text(AppStrings.loginSuccess)),
           );
