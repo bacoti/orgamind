@@ -24,12 +24,11 @@ class _HomeScreenState extends State<HomeScreen> {
     EventListScreen(), // Halaman Acara (tidak const)
     const DummyScannerScreen(), // Halaman Pemindai
     const Center(
-        child:
-            Text('Check-in History Screen')), // Placeholder untuk Riwayat
+      child: Text('Check-in History Screen'),
+    ), // Placeholder untuk Riwayat
     const ProfileScreen(), // Halaman Akun
   ];
   // --- (AKHIR PERUBAHAN) ---
-
 
   @override
   void initState() {
@@ -52,8 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _selectedIndex, // Hanya tampilkan widget di index ini
         children: screens, // Tumpuk semua halaman di sini
       ),
-      // --- (AKHIR PERBAIKAN) ---
 
+      // --- (AKHIR PERBAIKAN) ---
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -113,11 +112,7 @@ class DummyScannerScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.qr_code_2,
-              size: 80,
-              color: AppColors.primary,
-            ),
+            Icon(Icons.qr_code_2, size: 80, color: AppColors.primary),
             const SizedBox(height: 24),
             Text(
               'Pilih acara terlebih dahulu',
@@ -127,9 +122,9 @@ class DummyScannerScreen extends StatelessWidget {
             Text(
               'Buka salah satu acara yang sudah Anda terima\ndan klik "Lanjut ke Check-in"',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.gray600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.gray600),
             ),
           ],
         ),

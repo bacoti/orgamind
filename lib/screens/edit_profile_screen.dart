@@ -70,7 +70,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (value == null || value.isEmpty) {
       return AppStrings.emailRequired;
     }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
     if (!emailRegex.hasMatch(value)) {
       return AppStrings.emailInvalid;
     }
@@ -99,8 +101,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final updatedUser = currentUser.copyWith(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
-        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
-        bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
+        phone: _phoneController.text.trim().isEmpty
+            ? null
+            : _phoneController.text.trim(),
+        bio: _bioController.text.trim().isEmpty
+            ? null
+            : _bioController.text.trim(),
       );
 
       LoadingDialog.show(context, message: 'Memperbarui profil...');
@@ -141,23 +147,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              Text(
-                'Edit Profil',
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
+              // Info
+              const SizedBox(height: 16),
               Text(
                 'Perbarui informasi akun Anda',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.gray600,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: AppColors.gray600),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.08),
+              const SizedBox(height: 32),
 
               // Form
               Form(
@@ -205,7 +203,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       hint: 'Ceritakan sedikit tentang diri Anda',
                       controller: _bioController,
                       maxLines: 3,
-                      prefixIcon: const Icon(Icons.description_outlined),
                       focusNode: _bioFocus,
                     ),
                     const SizedBox(height: 24),

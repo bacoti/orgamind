@@ -20,7 +20,10 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              final authProvider = Provider.of<AuthProvider>(
+                context,
+                listen: false,
+              );
               await authProvider.logout();
               // Navigation akan dihandle oleh _HomeRouter
             },
@@ -32,9 +35,7 @@ class ProfileScreen extends StatelessWidget {
           final user = authProvider.currentUser;
 
           if (user == null) {
-            return const Center(
-              child: Text('User tidak ditemukan'),
-            );
+            return const Center(child: Text('User tidak ditemukan'));
           }
 
           return SafeArea(
@@ -48,16 +49,16 @@ class ProfileScreen extends StatelessWidget {
                   Text(
                     'Profil Anda',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Kelola informasi akun Anda',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppColors.gray600,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(color: AppColors.gray600),
                   ),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
@@ -83,16 +84,14 @@ class ProfileScreen extends StatelessWidget {
                         const SizedBox(height: 16),
                         Text(
                           user.name,
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           user.email,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                       ],
                     ),
@@ -156,10 +155,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Container(
-          height: 1,
-          color: AppColors.gray300,
-        ),
+        Container(height: 1, color: AppColors.gray300),
       ],
     );
   }
