@@ -75,8 +75,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
         Text(
           widget.label,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            color: _isFocused ? AppColors.primary : AppColors.gray700,
-          ),
+                color: _isFocused ? AppColors.primary : AppColors.gray700,
+              ),
         ),
         const SizedBox(height: 8),
         // Text Field
@@ -95,12 +95,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
             hintText: widget.hint,
             prefixIcon: widget.prefixIcon,
             suffixIcon: widget.suffixIcon,
-            isDense: true,
-            alignLabelWithHint:
-                (widget.maxLines != null && widget.maxLines! > 1),
-            contentPadding: (widget.maxLines != null && widget.maxLines! > 1)
-                ? const EdgeInsets.symmetric(vertical: 16, horizontal: 0)
-                : null,
           ),
         ),
       ],
@@ -151,11 +145,15 @@ class CustomElevatedButton extends StatelessWidget {
                 ),
               )
             : icon != null
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [icon!, const SizedBox(width: 8), Text(label)],
-              )
-            : Text(label),
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      icon!,
+                      const SizedBox(width: 8),
+                      Text(label),
+                    ],
+                  )
+                : Text(label),
       ),
     );
   }
@@ -185,13 +183,20 @@ class CustomOutlinedButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: borderColor ?? AppColors.primary, width: 1.5),
+          side: BorderSide(
+            color: borderColor ?? AppColors.primary,
+            width: 1.5,
+          ),
           foregroundColor: textColor ?? AppColors.primary,
         ),
         child: icon != null
             ? Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [icon!, const SizedBox(width: 8), Text(label)],
+                children: [
+                  icon!,
+                  const SizedBox(width: 8),
+                  Text(label),
+                ],
               )
             : Text(label),
       ),
@@ -203,12 +208,17 @@ class CustomOutlinedButton extends StatelessWidget {
 class LoadingDialog extends StatelessWidget {
   final String? message;
 
-  const LoadingDialog({Key? key, this.message}) : super(key: key);
+  const LoadingDialog({
+    Key? key,
+    this.message,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -271,9 +281,17 @@ class CustomAlertDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Text(title, style: Theme.of(context).textTheme.headlineSmall),
-      content: Text(message, style: Theme.of(context).textTheme.bodyLarge),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.headlineSmall,
+      ),
+      content: Text(
+        message,
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
       actions: [
         if (cancelLabel != null || onCancel != null)
           TextButton(
