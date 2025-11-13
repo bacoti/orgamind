@@ -5,6 +5,7 @@ import '../constants/strings.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/common_widgets.dart';
 import 'edit_profile_screen.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -16,16 +17,40 @@ class ProfileScreen extends StatelessWidget {
         title: const Text('Profil'),
         elevation: 0,
         scrolledUnderElevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.logout();
-              // Navigation akan dihandle oleh _HomeRouter
-            },
-          ),
-        ],
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                // Tampilkan konfirmasi sebelum logout
+                CustomAlertDialog.show(
+                  context,
+                  title: AppStrings.confirm,
+                  message: AppStrings.confirmLogout,
+                  actionLabel: AppStrings.yes,
+                  cancelLabel: AppStrings.no,
+                  onAction: () async {
+                    final nav = Navigator.of(context);
+                    nav.pop(); // Tutup dialog
+                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                    // Tampilkan loading
+                    LoadingDialog.show(context, message: AppStrings.loading);
+                    await authProvider.logout();
+                    // Tutup loading menggunakan saved NavigatorState
+                    nav.pop();
+
+                    // Pastikan kembali ke layar Login dan hapus semua route sebelumnya
+                    nav.pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      (route) => false,
+                    );
+                  },
+                  onCancel: () {
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            ),
+          ],
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
