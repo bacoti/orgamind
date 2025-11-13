@@ -95,6 +95,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
             hintText: widget.hint,
             prefixIcon: widget.prefixIcon,
             suffixIcon: widget.suffixIcon,
+            isDense: true,
+            contentPadding: (widget.maxLines != null && widget.maxLines! > 1)
+                ? const EdgeInsets.symmetric(vertical: 12, horizontal: 12)
+                : null,
           ),
         ),
       ],

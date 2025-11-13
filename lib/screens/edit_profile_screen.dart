@@ -205,7 +205,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       hint: 'Ceritakan sedikit tentang diri Anda',
                       controller: _bioController,
                       maxLines: 3,
-                      prefixIcon: const Icon(Icons.description_outlined),
                       focusNode: _bioFocus,
                     ),
                     const SizedBox(height: 24),
