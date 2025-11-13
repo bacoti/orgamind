@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late FocusNode _emailFocus;
   late FocusNode _passwordFocus;
   bool _obscurePassword = true;
+  bool _rememberMe = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -112,20 +113,33 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              const SizedBox(height: 32),
               Text(
-                AppStrings.login,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                'Masuk',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Selamat kembali! Masuk ke akun Anda untuk melanjutkan',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.gray600,
-                    ),
+                'Selamat kembali!',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.black,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Masuk untuk melanjutkan',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.gray600,
+                ),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.08),
 
@@ -147,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         setState(() {});
                       },
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
                     // Password Field
                     CustomTextField(
@@ -173,21 +187,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 12),
 
-                    // Forgot Password Link
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // TODO: Navigate to forgot password screen
-                        },
-                        child: Text(
-                          AppStrings.forgotPassword,
+                    // Remember Me Checkbox
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: _rememberMe,
+                          onChanged: (value) {
+                            setState(() {
+                              _rememberMe = value ?? false;
+                            });
+                          },
+                          activeColor: AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Ingat saya',
                           style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: AppColors.gray700,
                           ),
                         ),
-                      ),
+                      ],
                     ),
                     const SizedBox(height: 24),
 
@@ -198,6 +218,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           label: AppStrings.login,
                           onPressed: _handleLogin,
                           isLoading: authProvider.isLoading,
+                          icon: const Icon(
+                            Icons.arrow_forward,
+                            size: 24,
+                            color: AppColors.white,
+                          ),
                         );
                       },
                     ),
@@ -220,7 +245,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       'atau',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.gray600,
+                      ),
                     ),
                   ),
                   Expanded(
@@ -233,6 +261,24 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               const SizedBox(height: 24),
+
+              // Forgot Password Link
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    // TODO: Navigate to forgot password screen
+                  },
+                  child: Text(
+                    AppStrings.forgotPassword,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Register Link
               Row(

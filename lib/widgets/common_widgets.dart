@@ -90,7 +90,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           minLines: widget.minLines,
           readOnly: widget.readOnly,
           onChanged: widget.onChanged,
-          style: Theme.of(context).textTheme.bodyLarge,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: AppColors.black,
+              ),
           decoration: InputDecoration(
             hintText: widget.hint,
             prefixIcon: widget.prefixIcon,
@@ -134,6 +136,22 @@ class CustomElevatedButton extends StatelessWidget {
           foregroundColor: foregroundColor ?? AppColors.white,
           disabledBackgroundColor: AppColors.gray300,
           disabledForegroundColor: AppColors.gray500,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 0,
+          shadowColor: AppColors.primary.withOpacity(0.3),
+          surfaceTintColor: Colors.transparent,
+        ).copyWith(
+          elevation: MaterialStateProperty.resolveWith<double>(
+            (Set<MaterialState> states) {
+              if (states.contains(MaterialState.pressed)) {
+                return 0;
+              }
+              return 4; // Default elevation
+            },
+          ),
         ),
         child: isLoading
             ? const SizedBox(
@@ -148,9 +166,9 @@ class CustomElevatedButton extends StatelessWidget {
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      icon!,
-                      const SizedBox(width: 8),
                       Text(label),
+                      const SizedBox(width: 8),
+                      icon!,
                     ],
                   )
                 : Text(label),
