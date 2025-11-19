@@ -1,5 +1,5 @@
 // lib/screens/event_list_screen.dart
-// (KODE LENGKAP - SUDAH DITAMBAH SORTING TANGGAL)
+// (VERSI BERSIH - LIST KOSONG - SIAP DI-INPUT)
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -15,27 +15,23 @@ class EventListScreen extends StatefulWidget {
 }
 
 class _EventListScreenState extends State<EventListScreen> {
-  List<EventModel> dummyEvents = [];
+  // --- PERBAIKAN DI SINI: KITA KOSONGKAN LIST-NYA ---
+  List<EventModel> dummyEvents = []; 
+  // --------------------------------------------------
 
-  // --- (INI BAGIAN YANG SAYA PERBAIKI) ---
   void _tambahAcaraBaru(EventModel acaraBaru) {
     setState(() {
-      // 1. Masukkan data baru
       dummyEvents.add(acaraBaru);
-      
-      // 2. URUTKAN TANGGAL (Ascending: Tgl Kecil di Atas)
+      // Urutkan tanggal (terdekat di atas)
       dummyEvents.sort((a, b) => a.date.compareTo(b.date));
     });
   }
-  // --- (AKHIR PERBAIKAN) ---
 
   void _bukaHalamanInput() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (ctx) => CreateEventScreen(
-          onSimpan: _tambahAcaraBaru,
-        ),
+        builder: (ctx) => CreateEventScreen(onSimpan: _tambahAcaraBaru),
       ),
     );
   }
@@ -43,82 +39,141 @@ class _EventListScreenState extends State<EventListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text(
-          'Daftar Acara', // Saya kembalikan judulnya jadi simple
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          'Acara Ku',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
-        elevation: 1,
-        foregroundColor: Colors.black,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
       ),
+      // Tampilkan pesan jika kosong, tampilkan list jika ada isinya
       body: dummyEvents.isEmpty
           ? Center(
-              child: Text(
-                'Belum ada acara.\nSilakan tekan tombol + untuk menambah.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.event_busy, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Belum ada acara.',
+                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+                  ),
+                  Text(
+                    'Tekan tombol + untuk membuat acara baru.',
+                    style: TextStyle(color: Colors.grey[500]),
+                  ),
+                ],
               ),
             )
           : ListView.builder(
+              padding: const EdgeInsets.all(16),
               itemCount: dummyEvents.length,
               itemBuilder: (ctx, index) {
                 final event = dummyEvents[index];
+                
+                // Logika warna badge status
+                final isConfirmed = event.status == 'Hadir';
+                final statusColor = isConfirmed ? Colors.green.shade50 : Colors.orange.shade50;
+                final statusTextColor = isConfirmed ? Colors.green : Colors.orange;
 
-                return Card(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue.shade50,
-                      radius: 25,
+                return GestureDetector(
+                  onTap: () async { // Tambahkan 'async'
+                    // Tunggu sampai balik dari halaman detail
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EventDetailScreen(event: event),
+                      ),
+                    );
+                    // Setelah balik, refresh tampilan biar statusnya update
+                    setState(() {});
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            DateFormat('dd').format(event.date),
-                            style: const TextStyle(
-                                fontSize: 14,
+                          // Badge Status
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: statusColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              event.status,
+                              style: TextStyle(
+                                color: statusTextColor,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent),
+                                fontSize: 12,
+                              ),
+                            ),
                           ),
+                          const SizedBox(height: 12),
+                          // Judul
                           Text(
-                            DateFormat('MMM', 'id_ID').format(event.date),
+                            event.title,
                             style: const TextStyle(
-                                fontSize: 10, color: Colors.blueAccent),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // Tanggal
+                          Row(
+                            children: [
+                              Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
+                              const SizedBox(width: 8),
+                              Text(
+                                DateFormat('dd MMM yyyy').format(event.date),
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          // Lokasi
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
+                              const SizedBox(width: 8),
+                              Text(
+                                event.location,
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                    title: Text(
-                      event.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(event.location),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EventDetailScreen(
-                            event: event,
-                          ),
-                        ),
-                      );
-                    },
                   ),
                 );
               },
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _bukaHalamanInput,
-        child: const Icon(Icons.add),
-        tooltip: 'Input Acara Baru',
         backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
