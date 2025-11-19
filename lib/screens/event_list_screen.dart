@@ -1,5 +1,5 @@
 // lib/screens/event_list_screen.dart
-// (KODE BERSIH - TANPA MIXIN YANG GAGAL)
+// (KODE LENGKAP - SUDAH DITAMBAH SORTING TANGGAL)
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,17 +14,20 @@ class EventListScreen extends StatefulWidget {
   State<EventListScreen> createState() => _EventListScreenState();
 }
 
-// 'with AutomaticKeep...' SUDAH DIHAPUS, karena tidak perlu
 class _EventListScreenState extends State<EventListScreen> {
   List<EventModel> dummyEvents = [];
 
-  // 'wantKeepAlive' SUDAH DIHAPUS
-
+  // --- (INI BAGIAN YANG SAYA PERBAIKI) ---
   void _tambahAcaraBaru(EventModel acaraBaru) {
     setState(() {
+      // 1. Masukkan data baru
       dummyEvents.add(acaraBaru);
+      
+      // 2. URUTKAN TANGGAL (Ascending: Tgl Kecil di Atas)
+      dummyEvents.sort((a, b) => a.date.compareTo(b.date));
     });
   }
+  // --- (AKHIR PERBAIKAN) ---
 
   void _bukaHalamanInput() {
     Navigator.push(
@@ -39,12 +42,10 @@ class _EventListScreenState extends State<EventListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 'super.build(context)' SUDAH DIHAPUS
-
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Daftar Acara ',
+          'Daftar Acara', // Saya kembalikan judulnya jadi simple
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 20,
