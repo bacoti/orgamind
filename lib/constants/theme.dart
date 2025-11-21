@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // Primary Colors - Blue for login
-  static const Color primary = Color(0xFF007AFF);
+  static const Color primary = Color(0xFF0A7AFF);
   static const Color primaryLight = Color(0xFF4DA3FF);
   static const Color primaryDark = Color(0xFF0056CC);
 
@@ -17,7 +18,7 @@ class AppColors {
   static const Color successDark = Color(0xFF047857);
 
   // Error Colors
-  static const Color error = Color(0xFFFF3B30);
+  static const Color error = Color(0xFFFF4D4F);
   static const Color errorLight = Color(0xFFFCA5A5);
   static const Color errorDark = Color(0xFFDC2626);
 
@@ -28,7 +29,7 @@ class AppColors {
 
   // Neutral Colors
   static const Color white = Color(0xFFFFFFFF);
-  static const Color black = Color(0xFF000000);
+  static const Color black = Color(0xFF1A1A1A);
   static const Color gray50 = Color(0xFFFAFAFA);
   static const Color gray100 = Color(0xFFF3F4F6);
   static const Color gray200 = Color(0xFFE5E7EB);
@@ -50,6 +51,7 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+    fontFamily: GoogleFonts.inter().fontFamily,
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.light,
@@ -80,9 +82,9 @@ class AppTheme {
           vertical: 16,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
-        elevation: 0,
+        elevation: 1,
         shadowColor: AppColors.primary.withOpacity(0.3),
       ),
     ),
@@ -116,36 +118,36 @@ class AppTheme {
       filled: true,
       fillColor: AppColors.white,
       contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
+        horizontal: 14,
         vertical: 14,
       ),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(
-          color: AppColors.gray300,
+          color: Color(0xFFE5E5E5),
         ),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(
-          color: AppColors.gray300,
+          color: Color(0xFFE5E5E5),
         ),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(
           color: AppColors.primary,
           width: 2,
         ),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(
           color: AppColors.error,
         ),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(10),
         borderSide: const BorderSide(
           color: AppColors.error,
           width: 2,
@@ -157,85 +159,85 @@ class AppTheme {
         fontWeight: FontWeight.w500,
       ),
       hintStyle: const TextStyle(
-        color: AppColors.gray400,
-        fontSize: 14,
+        color: Color(0xFF999999),
+        fontSize: 15,
       ),
     ),
     // Text Themes
-    textTheme: const TextTheme(
-      displayLarge: TextStyle(
+    textTheme: TextTheme(
+      displayLarge: GoogleFonts.inter(
         fontSize: 32,
         fontWeight: FontWeight.bold,
         color: AppColors.black,
       ),
-      displayMedium: TextStyle(
+      displayMedium: GoogleFonts.inter(
         fontSize: 28,
         fontWeight: FontWeight.bold,
         color: AppColors.black,
       ),
-      displaySmall: TextStyle(
+      displaySmall: GoogleFonts.inter(
         fontSize: 24,
         fontWeight: FontWeight.bold,
         color: AppColors.black,
       ),
-      headlineMedium: TextStyle(
+      headlineMedium: GoogleFonts.inter(
         fontSize: 22,
         fontWeight: FontWeight.bold,
         color: AppColors.black,
       ),
-      headlineSmall: TextStyle(
+      headlineSmall: GoogleFonts.inter(
         fontSize: 20,
         fontWeight: FontWeight.w600,
         color: AppColors.black,
       ),
-      titleLarge: TextStyle(
+      titleLarge: GoogleFonts.inter(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         color: AppColors.black,
       ),
-      titleMedium: TextStyle(
+      titleMedium: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         color: AppColors.black,
       ),
-      titleSmall: TextStyle(
+      titleSmall: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         color: AppColors.black,
       ),
-      bodyLarge: TextStyle(
+      bodyLarge: GoogleFonts.inter(
         fontSize: 16,
         fontWeight: FontWeight.normal,
         color: AppColors.gray900,
       ),
-      bodyMedium: TextStyle(
+      bodyMedium: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.normal,
         color: AppColors.gray700,
       ),
-      bodySmall: TextStyle(
-        fontSize: 12,
+      bodySmall: GoogleFonts.inter(
+        fontSize: 13,
         fontWeight: FontWeight.normal,
         color: AppColors.gray600,
       ),
-      labelLarge: TextStyle(
+      labelLarge: GoogleFonts.inter(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: AppColors.black,
       ),
     ),
     // Scaffold Background
-    scaffoldBackgroundColor: AppColors.gray50,
+    scaffoldBackgroundColor: AppColors.white,
     // Divider Theme
     dividerTheme: const DividerThemeData(
-      color: AppColors.gray200,
+      color: Color(0xFFDDDDDD),
       thickness: 1,
       space: 16,
     ),
     // Snackbar Theme
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.gray900,
-      contentTextStyle: const TextStyle(
+      contentTextStyle: GoogleFonts.inter(
         color: AppColors.white,
         fontSize: 14,
       ),

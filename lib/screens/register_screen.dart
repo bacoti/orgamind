@@ -44,10 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   /// Validasi Nama
   String? _validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return AppStrings.nameRequired;
-    }
-    if (value.length < 3) {
-      return 'Nama minimal 3 karakter';
+      return 'Harus diisi.';
     }
     return null;
   }
@@ -55,11 +52,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   /// Validasi Email
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return AppStrings.emailRequired;
+      return 'Harus diisi.';
     }
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(value)) {
-      return AppStrings.emailInvalid;
+      return 'Harus menggunakan format email yang benar.';
     }
     return null;
   }
@@ -67,13 +64,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   /// Validasi Password
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
-      return AppStrings.passwordRequired;
+      return 'Harus diisi.';
     }
     if (value.length < 8) {
-      return 'Kata sandi minimal 8 karakter';
+      return 'Password minimal 8 karakter, mengandung huruf & angka.';
     }
     if (!RegExp(r'[A-Za-z]').hasMatch(value) || !RegExp(r'[0-9]').hasMatch(value)) {
-      return 'Kata sandi harus mengandung huruf dan angka';
+      return 'Password minimal 8 karakter, mengandung huruf & angka.';
     }
     return null;
   }
@@ -81,10 +78,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   /// Validasi Konfirmasi Password
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Konfirmasi password tidak boleh kosong';
+      return 'Harus diisi.';
     }
     if (value != _passwordController.text) {
-      return AppStrings.passwordNotMatch;
+      return 'Konfirmasi sandi harus sama dengan password.';
     }
     return null;
   }
@@ -156,32 +153,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
-              const SizedBox(height: 32),
               Text(
                 'Daftar',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black,
-                  height: 1.2,
-                ),
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.black,
+                    ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
                 'Buat akun baru untuk memulai!',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.gray600,
-                  height: 1.5,
-                ),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.gray600,
+                    ),
               ),
-              SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+              const SizedBox(height: 32),
 
               // Form
               Form(
@@ -189,137 +181,335 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   children: [
                     // Full Name Field
-                    EnhancedTextField(
-                      label: 'Nama Lengkap',
-                      hint: 'Nama Lengkap Anda',
-                      controller: _nameController,
-                      keyboardType: TextInputType.name,
-                      validator: _validateName,
-                      realTimeValidator: (value) {
-                        if (value == null || value.isEmpty) return null;
-                        if (value.length < 3) return 'Nama minimal 3 karakter';
-                        return null;
-                      },
-                      prefixIcon: const Icon(Icons.person_outline),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Nama Lengkap',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: AppColors.gray600,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _nameController,
+                          validator: _validateName,
+                          keyboardType: TextInputType.name,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.black,
+                              ),
+                          decoration: InputDecoration(
+                            hintText: 'Nama Lengkap Anda',
+                            prefixIcon: const Icon(
+                              Icons.person_outline,
+                              color: Color(0xFF999999),
+                            ),
+                            contentPadding: const EdgeInsets.all(14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Email Field
-                    EnhancedTextField(
-                      label: 'Email',
-                      hint: 'contoh@email.com',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: _validateEmail,
-                      realTimeValidator: (value) {
-                        if (value == null || value.isEmpty) return null;
-                        final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                        if (!emailRegex.hasMatch(value)) return 'Format email tidak valid';
-                        return null;
-                      },
-                      prefixIcon: const Icon(Icons.email_outlined),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Email',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: AppColors.gray600,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _emailController,
+                          validator: _validateEmail,
+                          keyboardType: TextInputType.emailAddress,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.black,
+                              ),
+                          decoration: InputDecoration(
+                            hintText: 'contoh@email.com',
+                            prefixIcon: const Icon(
+                              Icons.mail_outline,
+                              color: Color(0xFF999999),
+                            ),
+                            contentPadding: const EdgeInsets.all(14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Password Field
-                    EnhancedTextField(
-                      label: 'Kata Sandi',
-                      hint: '••••••••',
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      validator: _validatePassword,
-                      realTimeValidator: (value) {
-                        if (value == null || value.isEmpty) return null;
-                        if (value.length < 8) return 'Minimal 8 karakter';
-                        if (!RegExp(r'[A-Za-z]').hasMatch(value) || !RegExp(r'[0-9]').hasMatch(value)) {
-                          return 'Harus mengandung huruf dan angka';
-                        }
-                        return null;
-                      },
-                      helperText: 'Minimal 8 karakter dengan huruf & angka',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Kata Sandi',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: AppColors.gray600,
+                              ),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _passwordController,
+                          validator: _validatePassword,
+                          obscureText: _obscurePassword,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.black,
+                              ),
+                          decoration: InputDecoration(
+                            hintText: '••••••••',
+                            helperText: 'Minimal 8 karakter dengan huruf & angka',
+                            helperStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: const Color(0xFFB1B1B1),
+                                ),
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: Color(0xFF999999),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: const Color(0xFF999999),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                            contentPadding: const EdgeInsets.all(14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Confirm Password Field
-                    EnhancedTextField(
-                      label: 'Konfirmasi Kata Sandi',
-                      hint: '••••••••',
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmPassword,
-                      validator: _validateConfirmPassword,
-                      realTimeValidator: (value) {
-                        if (value == null || value.isEmpty) return null;
-                        if (value != _passwordController.text) return 'Kata sandi tidak cocok';
-                        return null;
-                      },
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Konfirmasi Kata Sandi',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                color: AppColors.gray600,
+                              ),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword =
-                                !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _confirmPasswordController,
+                          validator: _validateConfirmPassword,
+                          obscureText: _obscureConfirmPassword,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.black,
+                              ),
+                          decoration: InputDecoration(
+                            hintText: '••••••••',
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: Color(0xFF999999),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureConfirmPassword
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: const Color(0xFF999999),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                                });
+                              },
+                            ),
+                            contentPadding: const EdgeInsets.all(14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: Color(0xFFE5E5E5),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 2,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(
+                                color: AppColors.error,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Terms & Conditions Checkbox
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Checkbox(
-                          value: _acceptTerms,
-                          onChanged: (value) {
-                            setState(() {
-                              _acceptTerms = value ?? false;
-                            });
-                          },
-                          activeColor: AppColors.primary,
+                        SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: Checkbox(
+                            value: _acceptTerms,
+                            onChanged: (value) {
+                              setState(() {
+                                _acceptTerms = value ?? false;
+                              });
+                            },
+                            activeColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            side: const BorderSide(
+                              color: Color(0xFFE5E5E5),
+                              width: 1,
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: RichText(
                             text: TextSpan(
                               text: 'Saya menyetujui ',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: AppColors.gray700,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.gray600,
+                                  ),
                               children: [
                                 TextSpan(
                                   text: 'Syarat & Ketentuan',
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                   // TODO: Add onTap for terms
                                 ),
                                 const TextSpan(text: ' serta '),
                                 TextSpan(
                                   text: 'Kebijakan Privasi',
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                   // TODO: Add onTap for privacy
                                 ),
                               ],
@@ -328,7 +518,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
 
                     // Register Button
                     Consumer<AuthProvider>(
@@ -346,29 +536,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               const SizedBox(height: 32),
 
-              // Divider
+              // Divider with Text
               Row(
                 children: [
                   Expanded(
                     child: Container(
                       height: 1,
-                      color: AppColors.gray300,
+                      color: const Color(0xFFDDDDDD),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       'atau',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.gray600,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: const Color(0xFF999999),
+                          ),
                     ),
                   ),
                   Expanded(
                     child: Container(
                       height: 1,
-                      color: AppColors.gray300,
+                      color: const Color(0xFFDDDDDD),
                     ),
                   ),
                 ],
@@ -376,50 +565,133 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               const SizedBox(height: 24),
 
-              // Social Registration
-              CustomOutlinedButton(
-                label: 'Daftar dengan Google',
-                onPressed: () {
-                  // TODO: Implement Google sign up
-                },
-                icon: const Icon(Icons.g_mobiledata, size: 24),
-                borderColor: AppColors.gray300,
-                textColor: AppColors.gray700,
+              // Google Button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    // TODO: Implement Google sign up
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(
+                      color: Color(0xFFE5E5E5),
+                      width: 1,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Google logo - simplified representation
+                      Container(
+                        width: 24,
+                        height: 24,
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              top: 2,
+                              left: 2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF4285F4), // Google Blue
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 2,
+                              right: 2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFEA4335), // Google Red
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 2,
+                              left: 2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFBBC05), // Google Yellow
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 2,
+                              right: 2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF34A853), // Google Green
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Daftar dengan Google',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.gray700,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 36),
 
               // Login Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    AppStrings.alreadyHaveAccount,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.gray700,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      AppStrings.login,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
+              Center(
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Sudah punya akun? ',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: AppColors.gray600,
+                            ),
                       ),
-                    ),
+                      WidgetSpan(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Masuk',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),

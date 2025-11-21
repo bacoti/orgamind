@@ -133,6 +133,7 @@ class CustomElevatedButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? double.infinity,
+      height: 52,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
@@ -142,9 +143,9 @@ class CustomElevatedButton extends StatelessWidget {
           disabledForegroundColor: AppColors.gray500,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
-          elevation: 0,
+          elevation: 1,
           shadowColor: AppColors.primary.withOpacity(0.3),
           surfaceTintColor: Colors.transparent,
         ).copyWith(
