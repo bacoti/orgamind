@@ -19,7 +19,7 @@ class CustomTextField extends StatefulWidget {
   final FocusNode? focusNode;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.label,
     this.hint,
     this.controller,
@@ -33,7 +33,7 @@ class CustomTextField extends StatefulWidget {
     this.readOnly = false,
     this.onChanged,
     this.focusNode,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -119,7 +119,7 @@ class CustomElevatedButton extends StatelessWidget {
   final Color? foregroundColor;
 
   const CustomElevatedButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.isLoading = false,
@@ -127,7 +127,7 @@ class CustomElevatedButton extends StatelessWidget {
     this.width,
     this.backgroundColor,
     this.foregroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -146,12 +146,12 @@ class CustomElevatedButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
           ),
           elevation: 1,
-          shadowColor: AppColors.primary.withOpacity(0.3),
+          shadowColor: AppColors.primary.withValues(alpha: 0.3),
           surfaceTintColor: Colors.transparent,
         ).copyWith(
-          elevation: MaterialStateProperty.resolveWith<double>(
-            (Set<MaterialState> states) {
-              if (states.contains(MaterialState.pressed)) {
+          elevation: WidgetStateProperty.resolveWith<double>(
+            (Set<WidgetState> states) {
+              if (states.contains(WidgetState.pressed)) {
                 return 0;
               }
               return 4; // Default elevation
@@ -191,13 +191,13 @@ class CustomOutlinedButton extends StatelessWidget {
   final Color? textColor;
 
   const CustomOutlinedButton({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
     this.icon,
     this.borderColor,
     this.textColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -232,9 +232,9 @@ class LoadingDialog extends StatelessWidget {
   final String? message;
 
   const LoadingDialog({
-    Key? key,
+    super.key,
     this.message,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -290,7 +290,7 @@ class CustomAlertDialog extends StatelessWidget {
   final bool isDanger;
 
   const CustomAlertDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.message,
     this.actionLabel,
@@ -299,7 +299,7 @@ class CustomAlertDialog extends StatelessWidget {
     this.onCancel,
     this.actionColor,
     this.isDanger = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +386,7 @@ class EnhancedTextField extends StatefulWidget {
   final bool showStatusIcon;
 
   const EnhancedTextField({
-    Key? key,
+    super.key,
     required this.label,
     this.hint,
     this.controller,
@@ -403,7 +403,7 @@ class EnhancedTextField extends StatefulWidget {
     this.focusNode,
     this.helperText,
     this.showStatusIcon = true,
-  }) : super(key: key);
+  });
 
   @override
   State<EnhancedTextField> createState() => _EnhancedTextFieldState();

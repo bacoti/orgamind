@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
 
 /// Router untuk navigate berdasarkan auth state
 class _HomeRouter extends StatelessWidget {
-  const _HomeRouter({Key? key}) : super(key: key);
+  const _HomeRouter();
 
   @override
   Widget build(BuildContext context) {

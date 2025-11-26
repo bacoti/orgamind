@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 class CreateEventScreen extends StatefulWidget {
   final Function(EventModel) onSimpan;
 
-  const CreateEventScreen({Key? key, required this.onSimpan}) : super(key: key);
+  const CreateEventScreen({super.key, required this.onSimpan});
 
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();

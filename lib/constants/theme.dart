@@ -85,7 +85,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(14),
         ),
         elevation: 1,
-        shadowColor: AppColors.primary.withOpacity(0.3),
+        shadowColor: AppColors.primary.withValues(alpha: 0.3),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(

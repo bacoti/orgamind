@@ -8,7 +8,7 @@ import 'edit_profile_screen.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
                         // Avatar
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: AppColors.primary.withOpacity(0.1),
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                           backgroundImage: user.photoUrl != null
                               ? NetworkImage(user.photoUrl!)
                               : null,

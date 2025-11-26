@@ -9,7 +9,7 @@ import 'home_screen.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -370,6 +370,7 @@ class _LoginScreenState extends State<LoginScreen> {
               // Divider with Text
               Row(
                 children: [
+                  // ignore: sized_box_for_whitespace
                   Expanded(
                     child: Container(
                       height: 1,
@@ -386,6 +387,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   Expanded(
+                    // ignore: sized_box_for_whitespace
                     child: Container(
                       height: 1,
                       color: const Color(0xFFDDDDDD),
@@ -418,6 +420,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Google logo - simplified representation
+                      // ignore: sized_box_for_whitespace
                       Container(
                         width: 24,
                         height: 24,

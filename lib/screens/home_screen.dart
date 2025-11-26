@@ -8,7 +8,7 @@ import 'profile_screen.dart';
 import 'event_list_screen.dart'; // Pastikan import ini ada
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -99,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
 // --- (KITA PINDAHKAN DUMMY SCANNER KE LUAR AGAR BISA 'const') ---
 class DummyScannerScreen extends StatelessWidget {
-  const DummyScannerScreen({Key? key}) : super(key: key);
+  const DummyScannerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

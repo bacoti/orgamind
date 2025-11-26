@@ -4,7 +4,6 @@ import '../models/user.dart';
 class AuthService {
   static const String _tokenKey = 'auth_token';
   static const String _userKey = 'user_data';
-  static const String _usersDbKey = 'users_database'; // Database semua user yang terdaftar
 
   late SharedPreferences _prefs;
 

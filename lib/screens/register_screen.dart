@@ -7,7 +7,7 @@ import '../widgets/common_widgets.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -539,6 +539,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Divider with Text
               Row(
                 children: [
+                  // ignore: sized_box_for_whitespace
                   Expanded(
                     child: Container(
                       height: 1,
@@ -554,6 +555,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                     ),
                   ),
+                  // ignore: sized_box_for_whitespace
                   Expanded(
                     child: Container(
                       height: 1,
@@ -587,6 +589,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Google logo - simplified representation
+                      // ignore: sized_box_for_whitespace
                       Container(
                         width: 24,
                         height: 24,
