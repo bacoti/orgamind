@@ -113,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 20), // Tambahan jarak untuk notch iPhone
               // Header
               Text(
                 'Masuk',

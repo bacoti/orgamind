@@ -78,6 +78,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 20), // Tambahan jarak untuk notch iPhone
               // Header
               Text(
                 'Lupa Kata Sandi',
