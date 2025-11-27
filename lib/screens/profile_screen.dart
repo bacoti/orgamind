@@ -130,6 +130,8 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildInfoRow('Email', user.email),
                   const SizedBox(height: 16),
+                  _buildInfoRow('Role', user.role == 'admin' ? 'Admin' : 'Peserta'),
+                  const SizedBox(height: 16),
                   if (user.phone != null && user.phone!.isNotEmpty)
                     _buildInfoRow('Telepon', user.phone!),
                   if (user.phone != null && user.phone!.isNotEmpty)

@@ -23,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
   final _formKey = GlobalKey<FormState>();
+  String _selectedRole = 'participant';
 
   @override
   void initState() {
@@ -75,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final success = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
+        role: _selectedRole,
       );
 
       if (mounted) {
@@ -345,6 +347,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ],
                     ),
+
+                      // Role selector (Demo only)
+                      DropdownButtonFormField<String>(
+                        value: _selectedRole,
+                        decoration: InputDecoration(
+                          labelText: 'Role (demo)',
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'participant', child: Text('Peserta')),
+                          DropdownMenuItem(value: 'admin', child: Text('Admin (Demo)')),
+                        ],
+                        onChanged: (value) => setState(() => _selectedRole = value ?? 'participant'),
+                      ),
+                      const SizedBox(height: 16),
                     const SizedBox(height: 24),
 
                     // Login Button
@@ -377,6 +395,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 1,
                       color: const Color(0xFFDDDDDD),
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Role selection is demo-only. Admin role should be assigned by server in production.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),

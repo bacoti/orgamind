@@ -13,6 +13,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isLoggedIn => _currentUser != null;
+  bool get isAdmin => _currentUser?.role == 'admin';
 
   AuthProvider() {
     _initializeAuth();
@@ -26,13 +27,13 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Login
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String email, String password, {String role = 'participant'}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final success = await _authService.login(email, password);
+      final success = await _authService.login(email, password, role: role);
 
       if (success) {
         _currentUser = await _authService.getCurrentUser();
@@ -58,8 +59,7 @@ class AuthProvider extends ChangeNotifier {
     String name,
     String email,
     String password,
-    String confirmPassword,
-  ) async {
+    String confirmPassword, {String role = 'participant'}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -70,6 +70,7 @@ class AuthProvider extends ChangeNotifier {
         email,
         password,
         confirmPassword,
+        role: role,
       );
 
       if (success) {

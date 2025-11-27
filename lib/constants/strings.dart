@@ -84,6 +84,7 @@ class AppStrings {
   static const String scanner = 'Pemindai';
   static const String history = 'Riwayat';
   static const String account = 'Akun';
+  static const String users = 'Pengguna';
 
   // Misc
   static const String totalAttendees = 'Total Peserta';

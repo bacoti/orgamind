@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import '../models/event_model.dart';
 import 'package:intl/intl.dart';
+import '../constants/theme.dart';
 
 class CreateEventScreen extends StatefulWidget {
   final Function(EventModel) onSimpan;
@@ -240,9 +241,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitData,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
+                    onPressed: _submitData,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

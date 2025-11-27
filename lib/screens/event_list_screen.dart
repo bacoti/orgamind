@@ -3,6 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import '../constants/theme.dart';
 import '../models/event_model.dart';
 import 'event_detail_screen.dart';
 import 'create_event_screen.dart';
@@ -37,7 +40,7 @@ class _EventListScreenState extends State<EventListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: AppColors.white,
       appBar: AppBar(
         title: const Text(
           'Acara Ku',
@@ -192,11 +195,13 @@ class _EventListScreenState extends State<EventListScreen> {
                 );
               },
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _bukaHalamanInput,
-        backgroundColor: Colors.blueAccent,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton: Provider.of<AuthProvider>(context).isAdmin
+          ? FloatingActionButton(
+              onPressed: _bukaHalamanInput,
+              backgroundColor: AppColors.primary,
+              child: const Icon(Icons.add, color: Colors.white),
+            )
+          : null,
     );
   }
 }

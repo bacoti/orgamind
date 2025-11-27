@@ -5,6 +5,7 @@ class User {
   final String? phone;
   final String? photoUrl;
   final String? bio;
+  final String role; // 'admin' or 'participant'
 
   User({
     required this.id,
@@ -13,6 +14,7 @@ class User {
     this.phone,
     this.photoUrl,
     this.bio,
+    this.role = 'participant',
   });
 
   // Factory constructor untuk membuat User dari JSON
@@ -24,6 +26,7 @@ class User {
       phone: json['phone'],
       photoUrl: json['photoUrl'],
       bio: json['bio'],
+      role: json['role'] ?? 'participant',
     );
   }
 
@@ -36,6 +39,7 @@ class User {
       'phone': phone,
       'photoUrl': photoUrl,
       'bio': bio,
+      'role': role,
     };
   }
 
@@ -47,6 +51,7 @@ class User {
     String? phone,
     String? photoUrl,
     String? bio,
+    String? role,
   }) {
     return User(
       id: id ?? this.id,
@@ -55,6 +60,7 @@ class User {
       phone: phone ?? this.phone,
       photoUrl: photoUrl ?? this.photoUrl,
       bio: bio ?? this.bio,
+      role: role ?? this.role,
     );
   }
 }

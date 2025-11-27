@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
   final _formKey = GlobalKey<FormState>();
+  String _selectedRole = 'participant';
 
   @override
   void initState() {
@@ -113,6 +114,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _emailController.text.trim(),
         _passwordController.text,
         _confirmPasswordController.text,
+        role: _selectedRole,
       );
 
       if (mounted) {
@@ -242,6 +244,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ],
                     ),
+
+                      DropdownButtonFormField<String>(
+                        value: _selectedRole,
+                        decoration: InputDecoration(
+                          labelText: 'Role (demo)',
+                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: 'participant', child: Text('Peserta')),
+                          DropdownMenuItem(value: 'admin', child: Text('Admin (Demo)')),
+                        ],
+                        onChanged: (value) => setState(() => _selectedRole = value ?? 'participant'),
+                      ),
+                      const SizedBox(height: 12),
                     const SizedBox(height: 20),
 
                     // Email Field
@@ -546,6 +563,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       height: 1,
                       color: const Color(0xFFDDDDDD),
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Role selection is demo-only. Admin role should be assigned by server in production.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),

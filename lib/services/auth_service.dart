@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 
@@ -13,7 +14,7 @@ class AuthService {
   }
 
   // Login endpoint
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String email, String password, {String role = 'participant'}) async {
     try {
       // Simulasi API call (replace dengan API sesungguhnya)
       await Future.delayed(const Duration(seconds: 2));
@@ -38,6 +39,7 @@ class AuthService {
           name: nameToUse,
           email: email,
           phone: '08123456789',
+          role: role,
         );
 
         // Save token dan user data
@@ -57,8 +59,7 @@ class AuthService {
     String name,
     String email,
     String password,
-    String confirmPassword,
-  ) async {
+    String confirmPassword, {String role = 'participant'}) async {
     try {
       // Validasi password
       if (password != confirmPassword) {
@@ -78,6 +79,7 @@ class AuthService {
           id: 'user_${DateTime.now().millisecondsSinceEpoch}',
           name: name,
           email: email,
+          role: role,
         );
 
         // Save token dan user data
@@ -149,20 +151,26 @@ class AuthService {
 
   // Helper: Convert User to JSON string
   String _userToJsonString(User user) {
-    // Simple JSON encoding (bisa menggunakan json_serializable untuk production)
-    return '${user.id}|${user.name}|${user.email}|${user.phone}|${user.photoUrl}|${user.bio}';
+    return jsonEncode(user.toJson());
   }
 
   // Helper: Parse User from JSON string
   User _userFromJsonString(String jsonString) {
-    final parts = jsonString.split('|');
-    return User(
-      id: parts[0],
-      name: parts[1],
-      email: parts[2],
-      phone: parts[3].isEmpty ? null : parts[3],
-      photoUrl: parts[4].isEmpty ? null : parts[4],
-      bio: parts[5].isEmpty ? null : parts[5],
-    );
+    try {
+      final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+      return User.fromJson(jsonMap);
+    } catch (e) {
+      // If parsing fails, try to support legacy pipe-delimited format
+      final parts = jsonString.split('|');
+      return User(
+        id: parts.length > 0 ? parts[0] : '',
+        name: parts.length > 1 ? parts[1] : '',
+        email: parts.length > 2 ? parts[2] : '',
+        phone: parts.length > 3 && parts[3].isNotEmpty ? parts[3] : null,
+        photoUrl: parts.length > 4 && parts[4].isNotEmpty ? parts[4] : null,
+        bio: parts.length > 5 && parts[5].isNotEmpty ? parts[5] : null,
+        role: parts.length > 6 && parts[6].isNotEmpty ? parts[6] : 'participant',
+      );
+    }
   }
 }

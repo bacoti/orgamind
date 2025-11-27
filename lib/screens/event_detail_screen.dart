@@ -3,6 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../constants/theme.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/event_model.dart';
 
 class EventDetailScreen extends StatefulWidget {
@@ -61,14 +64,46 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
       appBar: AppBar(
         title: const Text(
           'Detail Acara',
-          style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold),
+          style: TextStyle(color: AppColors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.blueAccent),
+          icon: const Icon(Icons.arrow_back, color: AppColors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          if (Provider.of<AuthProvider>(context).isAdmin)
+            IconButton(
+              tooltip: 'Edit',
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Edit acara (demo)')));
+              },
+              icon: const Icon(Icons.edit, color: AppColors.primary),
+            ),
+          if (Provider.of<AuthProvider>(context).isAdmin)
+            IconButton(
+              tooltip: 'Delete',
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                          title: const Text('Hapus Acara'),
+                          content: const Text('Apakah Anda yakin ingin menghapus acara ini?'),
+                          actions: [
+                            TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Batal')),
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: const Text('Hapus')),
+                          ],
+                        ));
+              },
+              icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+            ),
+        ],
       ),
       body: Column(
         children: [
@@ -77,12 +112,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Placeholder Gambar
+                  // Placeholder Gambar (neutral background)
                   Container(
                     width: double.infinity,
                     height: 200,
-                    color: Colors.blue.shade50,
-                    child: Icon(Icons.image, size: 80, color: Colors.blue.shade200),
+                    color: AppColors.white,
+                    child: Icon(Icons.image, size: 80, color: AppColors.gray300),
                   ),
                   
                   Padding(
@@ -93,7 +128,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         Text(
                           widget.event.title,
                           style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1A237E),
+                            fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.black,
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -164,7 +199,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               children: [
                 // TOMBOL TOLAK
                 Expanded(
-                  child: OutlinedButton(
+                    child: OutlinedButton(
                     onPressed: () => _updateStatus('Ditolak'), // Panggil fungsi tolak
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
@@ -178,10 +213,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 const SizedBox(width: 16),
                 // TOMBOL HADIR
                 Expanded(
-                  child: ElevatedButton(
+                    child: ElevatedButton(
                     onPressed: () => _updateStatus('Hadir'), // Panggil fungsi hadir
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1A237E),
+                      backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
