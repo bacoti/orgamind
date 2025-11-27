@@ -1,11 +1,12 @@
 // lib/screens/event_list_screen.dart
-// (VERSI BERSIH - LIST KOSONG - SIAP DI-INPUT)
+// (SUDAH DIPERBAIKI: SINTAKS LENGKAP & BENAR)
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/event_model.dart';
 import 'event_detail_screen.dart';
 import 'create_event_screen.dart';
+import 'notification_screen.dart'; // Pastikan ini ada
 
 class EventListScreen extends StatefulWidget {
   const EventListScreen({super.key});
@@ -15,14 +16,11 @@ class EventListScreen extends StatefulWidget {
 }
 
 class _EventListScreenState extends State<EventListScreen> {
-  // --- PERBAIKAN DI SINI: KITA KOSONGKAN LIST-NYA ---
   List<EventModel> dummyEvents = []; 
-  // --------------------------------------------------
 
   void _tambahAcaraBaru(EventModel acaraBaru) {
     setState(() {
       dummyEvents.add(acaraBaru);
-      // Urutkan tanggal (terdekat di atas)
       dummyEvents.sort((a, b) => a.date.compareTo(b.date));
     });
   }
@@ -48,13 +46,40 @@ class _EventListScreenState extends State<EventListScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
+          // Tombol Notifikasi
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotificationScreen(events: dummyEvents),
+                    ),
+                  );
+                },
+              ),
+              if (dummyEvents.isNotEmpty)
+                Positioned(
+                  right: 12,
+                  top: 12,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 8,
+                      minHeight: 8,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
-      // Tampilkan pesan jika kosong, tampilkan list jika ada isinya
       body: dummyEvents.isEmpty
           ? Center(
               child: Column(
@@ -79,21 +104,18 @@ class _EventListScreenState extends State<EventListScreen> {
               itemBuilder: (ctx, index) {
                 final event = dummyEvents[index];
                 
-                // Logika warna badge status
                 final isConfirmed = event.status == 'Hadir';
                 final statusColor = isConfirmed ? Colors.green.shade50 : Colors.orange.shade50;
                 final statusTextColor = isConfirmed ? Colors.green : Colors.orange;
 
                 return GestureDetector(
-                  onTap: () async { // Tambahkan 'async'
-                    // Tunggu sampai balik dari halaman detail
+                  onTap: () async {
                     await Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => EventDetailScreen(event: event),
                       ),
                     );
-                    // Setelah balik, refresh tampilan biar statusnya update
                     setState(() {});
                   },
                   child: Container(
@@ -103,7 +125,7 @@ class _EventListScreenState extends State<EventListScreen> {
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
+                          color: Colors.black.withOpacity(0.05), // Ganti withValues jadi withOpacity
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
