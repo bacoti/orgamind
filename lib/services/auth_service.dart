@@ -163,7 +163,7 @@ class AuthService {
       // If parsing fails, try to support legacy pipe-delimited format
       final parts = jsonString.split('|');
       return User(
-        id: parts.length > 0 ? parts[0] : '',
+        id: parts.isNotEmpty ? parts[0] : '',
         name: parts.length > 1 ? parts[1] : '',
         email: parts.length > 2 ? parts[2] : '',
         phone: parts.length > 3 && parts[3].isNotEmpty ? parts[3] : null,

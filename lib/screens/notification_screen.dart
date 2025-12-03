@@ -6,7 +6,7 @@ class NotificationScreen extends StatelessWidget {
   // Halaman ini butuh data 'events' untuk ditampilkan
   final List<EventModel> events;
 
-  const NotificationScreen({Key? key, required this.events}) : super(key: key);
+  const NotificationScreen({super.key, required this.events});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class NotificationScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),

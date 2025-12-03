@@ -350,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Role selector (Demo only)
                       DropdownButtonFormField<String>(
-                        value: _selectedRole,
+                        initialValue: _selectedRole,
                         decoration: InputDecoration(
                           labelText: 'Role (demo)',
                           contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
@@ -396,10 +396,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: const Color(0xFFDDDDDD),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Role selection is demo-only. Admin role should be assigned by server in production.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Role selection is demo-only. Admin role should be assigned by server in production.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
