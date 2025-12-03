@@ -3,8 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'constants/theme.dart';
 import 'providers/auth_provider.dart';
+import 'providers/event_provider.dart';
+import 'providers/user_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/admin_dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +23,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: MaterialApp(
         title: 'OrgaMind - Event Management',
@@ -40,8 +45,13 @@ class _HomeRouter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // Jika sudah login, tampilkan HomeScreen
+        // Jika sudah login
         if (authProvider.isLoggedIn) {
+          // Cek apakah user adalah admin
+          if (authProvider.isAdmin) {
+            return const AdminDashboardScreen();
+          }
+          // User biasa tampilkan HomeScreen
           return const HomeScreen();
         }
 

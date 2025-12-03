@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import '../models/user.dart';
+import '../constants/api_config.dart';
 
 class AuthService {
   static const String _tokenKey = 'auth_token';
@@ -16,40 +18,43 @@ class AuthService {
   // Login endpoint
   Future<bool> login(String email, String password, {String role = 'participant'}) async {
     try {
-      // Simulasi API call (replace dengan API sesungguhnya)
-      await Future.delayed(const Duration(seconds: 2));
+      final response = await http.post(
+        Uri.parse(ApiConfig.authLogin),
+        headers: ApiConfig.getHeaders(),
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
 
-      // Validasi dummy (ganti dengan API validation)
-      if (email.isNotEmpty && password.isNotEmpty) {
-        // Generate dummy token
-        final String token =
-            'dummy_token_${DateTime.now().millisecondsSinceEpoch}';
-
-        // Cari user yang sudah terdaftar berdasarkan email
-        String? registeredName = _getUserNameFromStorage(email);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
         
-        // Jika user sudah pernah register, gunakan nama tersebut
-        // Jika belum pernah register, extract nama dari email
-        final String nameToUse = registeredName ?? 
-            email.split('@')[0].replaceAll('.', ' ').toUpperCase();
+        if (data['success'] == true) {
+          final token = data['data']['token'];
+          final userData = data['data'];
+          
+          final User user = User(
+            id: userData['userId'].toString(),
+            name: userData['name'],
+            email: userData['email'],
+            phone: userData['phone'],
+            photoUrl: userData['photoUrl'],
+            bio: userData['bio'],
+            role: userData['role'],
+          );
 
-        // Create dummy user
-        final User user = User(
-          id: 'user_001',
-          name: nameToUse,
-          email: email,
-          phone: '08123456789',
-          role: role,
-        );
+          // Save token dan user data
+          await _prefs.setString(_tokenKey, token);
+          await _prefs.setString(_userKey, _userToJsonString(user));
 
-        // Save token dan user data
-        await _prefs.setString(_tokenKey, token);
-        await _prefs.setString(_userKey, _userToJsonString(user));
-
-        return true;
+          return true;
+        }
       }
       return false;
     } catch (e) {
+      // ignore: avoid_print
+      print('Login error: $e');
       return false;
     }
   }
@@ -66,33 +71,41 @@ class AuthService {
         return false;
       }
 
-      // Simulasi API call
-      await Future.delayed(const Duration(seconds: 2));
+      final response = await http.post(
+        Uri.parse(ApiConfig.authRegister),
+        headers: ApiConfig.getHeaders(),
+        body: jsonEncode({
+          'name': name,
+          'email': email,
+          'password': password,
+        }),
+      );
 
-      if (name.isNotEmpty && email.isNotEmpty && password.isNotEmpty) {
-        // Generate dummy token
-        final String token =
-            'dummy_token_${DateTime.now().millisecondsSinceEpoch}';
-
-        // Create user
-        final User user = User(
-          id: 'user_${DateTime.now().millisecondsSinceEpoch}',
-          name: name,
-          email: email,
-          role: role,
-        );
-
-        // Save token dan user data
-        await _prefs.setString(_tokenKey, token);
-        await _prefs.setString(_userKey, _userToJsonString(user));
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
         
-        // Simpan mapping email ke nama untuk digunakan saat login nanti
-        await _prefs.setString('user_name_$email', name);
+        if (data['success'] == true) {
+          final token = data['data']['token'];
+          final userData = data['data'];
+          
+          final User user = User(
+            id: userData['userId'].toString(),
+            name: userData['name'],
+            email: userData['email'],
+            role: 'participant',
+          );
 
-        return true;
+          // Save token dan user data
+          await _prefs.setString(_tokenKey, token);
+          await _prefs.setString(_userKey, _userToJsonString(user));
+
+          return true;
+        }
       }
       return false;
     } catch (e) {
+      // ignore: avoid_print
+      print('Register error: $e');
       return false;
     }
   }
@@ -123,10 +136,43 @@ class AuthService {
   // Update user profile
   Future<bool> updateProfile(User user) async {
     try {
-      await Future.delayed(const Duration(seconds: 1));
-      await _prefs.setString(_userKey, _userToJsonString(user));
-      return true;
+      final token = getToken();
+      if (token == null) return false;
+
+      final response = await http.put(
+        Uri.parse(ApiConfig.userUpdateProfile),
+        headers: ApiConfig.getHeaders(token: token),
+        body: jsonEncode({
+          'name': user.name,
+          'phone': user.phone,
+          'bio': user.bio,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        if (data['success'] == true) {
+          final userData = data['data'];
+          
+          final updatedUser = User(
+            id: userData['userId'].toString(),
+            name: userData['name'],
+            email: userData['email'],
+            phone: userData['phone'],
+            photoUrl: userData['photoUrl'],
+            bio: userData['bio'],
+            role: userData['role'],
+          );
+          
+          await _prefs.setString(_userKey, _userToJsonString(updatedUser));
+          return true;
+        }
+      }
+      return false;
     } catch (e) {
+      // ignore: avoid_print
+      print('Update profile error: $e');
       return false;
     }
   }
@@ -135,18 +181,6 @@ class AuthService {
   Future<void> logout() async {
     await _prefs.remove(_tokenKey);
     await _prefs.remove(_userKey);
-  }
-
-  // Helper: Get registered user name by email from storage
-  String? _getUserNameFromStorage(String email) {
-    try {
-      // Cari di semua SharedPreferences keys yang mengandung user data
-      // Gunakan key format: 'user_email_data' untuk menyimpan mapping email ke nama
-      final String? storedName = _prefs.getString('user_name_$email');
-      return storedName;
-    } catch (e) {
-      return null;
-    }
   }
 
   // Helper: Convert User to JSON string

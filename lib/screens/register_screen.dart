@@ -557,28 +557,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
               // Divider with Text
               Row(
                 children: [
-                  // ignore: sized_box_for_whitespace
                   Expanded(
                     child: Container(
                       height: 1,
                       color: const Color(0xFFDDDDDD),
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Role selection is demo-only. Admin role should be assigned by server in production.',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
                     child: Text(
-                      'atau',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF999999),
-                          ),
+                      'Role selection is demo-only. Admin role should be assigned by server in production.',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
                   ),
-                  // ignore: sized_box_for_whitespace
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Container(
                       height: 1,
@@ -588,6 +583,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
 
+              const SizedBox(height: 24),
+
+              // Role Selection Section
               const SizedBox(height: 24),
 
               // Google Button

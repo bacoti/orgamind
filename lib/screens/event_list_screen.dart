@@ -1,15 +1,16 @@
 // lib/screens/event_list_screen.dart
-// (SUDAH DIPERBAIKI: SINTAKS LENGKAP & BENAR)
+// Updated to use real backend API
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/event_provider.dart';
 import '../constants/theme.dart';
-import '../models/event_model.dart';
+import '../services/auth_service.dart';
 import 'event_detail_screen.dart';
 import 'create_event_screen.dart';
-import 'notification_screen.dart'; // Pastikan ini ada
+import 'notification_screen.dart';
 
 class EventListScreen extends StatefulWidget {
   const EventListScreen({super.key});
@@ -19,22 +20,28 @@ class EventListScreen extends StatefulWidget {
 }
 
 class _EventListScreenState extends State<EventListScreen> {
-  List<EventModel> dummyEvents = []; 
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
 
-  void _tambahAcaraBaru(EventModel acaraBaru) {
-    setState(() {
-      dummyEvents.add(acaraBaru);
-      dummyEvents.sort((a, b) => a.date.compareTo(b.date));
-    });
+  Future<void> _loadEvents() async {
+    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+    final authService = AuthService();
+    await authService.init();
+    final token = authService.getToken();
+    
+    await eventProvider.getAllEvents(token: token);
   }
 
   void _bukaHalamanInput() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (ctx) => CreateEventScreen(onSimpan: _tambahAcaraBaru),
+        builder: (ctx) => const CreateEventScreen(),
       ),
-    );
+    ).then((_) => _loadEvents()); // Reload setelah create
   }
 
   @override
@@ -50,41 +57,75 @@ class _EventListScreenState extends State<EventListScreen> {
         elevation: 0,
         actions: [
           // Tombol Notifikasi
-          Stack(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => NotificationScreen(events: dummyEvents),
-                    ),
-                  );
-                },
-              ),
-              if (dummyEvents.isNotEmpty)
-                Positioned(
-                  right: 12,
-                  top: 12,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 8,
-                      minHeight: 8,
-                    ),
+          Consumer<EventProvider>(
+            builder: (context, eventProvider, child) {
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => NotificationScreen(events: eventProvider.events),
+                        ),
+                      );
+                    },
                   ),
-                ),
-            ],
+                  if (eventProvider.events.isNotEmpty)
+                    Positioned(
+                      right: 12,
+                      top: 12,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 8,
+                          minHeight: 8,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
-      body: dummyEvents.isEmpty
-          ? Center(
+      body: Consumer<EventProvider>(
+        builder: (context, eventProvider, child) {
+          if (eventProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (eventProvider.errorMessage != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: ${eventProvider.errorMessage}',
+                    style: TextStyle(fontSize: 16, color: Colors.red[600]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _loadEvents,
+                    child: const Text('Coba Lagi'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final events = eventProvider.events;
+
+          if (events.isEmpty) {
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -100,12 +141,16 @@ class _EventListScreenState extends State<EventListScreen> {
                   ),
                 ],
               ),
-            )
-          : ListView.builder(
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: _loadEvents,
+            child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: dummyEvents.length,
+              itemCount: events.length,
               itemBuilder: (ctx, index) {
-                final event = dummyEvents[index];
+                final event = events[index];
                 
                 final isConfirmed = event.status == 'Hadir';
                 final statusColor = isConfirmed ? Colors.green.shade50 : Colors.orange.shade50;
@@ -119,7 +164,7 @@ class _EventListScreenState extends State<EventListScreen> {
                         builder: (context) => EventDetailScreen(event: event),
                       ),
                     );
-                    setState(() {});
+                    _loadEvents(); // Reload after viewing details
                   },
                   child: Container(
                     margin: const EdgeInsets.only(bottom: 16),
@@ -195,6 +240,9 @@ class _EventListScreenState extends State<EventListScreen> {
                 );
               },
             ),
+          );
+        },
+      ),
       floatingActionButton: Provider.of<AuthProvider>(context).isAdmin
           ? FloatingActionButton(
               onPressed: _bukaHalamanInput,

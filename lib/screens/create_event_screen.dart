@@ -1,15 +1,15 @@
 // lib/screens/create_event_screen.dart
-// (VERSI UPDATE - SUDAH BISA PILIH JAM)
+// Updated to use backend API
 
 import 'package:flutter/material.dart';
-import '../models/event_model.dart';
+import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../providers/event_provider.dart';
+import '../services/auth_service.dart';
 import '../constants/theme.dart';
 
 class CreateEventScreen extends StatefulWidget {
-  final Function(EventModel) onSimpan;
-
-  const CreateEventScreen({super.key, required this.onSimpan});
+  const CreateEventScreen({super.key});
 
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();
@@ -19,13 +19,14 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _titleController = TextEditingController();
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _speakerController = TextEditingController();
+  final _categoryController = TextEditingController();
+  final _capacityController = TextEditingController(text: '100');
   
   DateTime? _selectedDate;
   
-  // --- VARIABEL JAM (BARU) ---
-  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0); // Default jam 9
-  TimeOfDay _endTime = const TimeOfDay(hour: 12, minute: 0);  // Default jam 12
+  // Variabel JAM
+  TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
+  TimeOfDay _endTime = const TimeOfDay(hour: 12, minute: 0);
 
   // Fungsi Pilih Tanggal
   void _pilihTanggal() {
@@ -42,7 +43,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     });
   }
 
-  // --- FUNGSI PILIH JAM (BARU) ---
+  // Fungsi Pilih Jam
   Future<void> _pilihJam(bool isStartTime) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -59,11 +60,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
-  void _submitData() {
+  Future<void> _submitData() async {
     final enteredTitle = _titleController.text;
     final enteredLocation = _locationController.text;
     final enteredDescription = _descriptionController.text;
-    final enteredSpeaker = _speakerController.text;
+    final enteredCategory = _categoryController.text;
+    final capacity = int.tryParse(_capacityController.text) ?? 100;
 
     if (enteredTitle.isEmpty || enteredLocation.isEmpty || _selectedDate == null) {
       showDialog(
@@ -77,22 +79,64 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return;
     }
 
-    // --- GABUNGKAN JAM MENJADI STRING (CONTOH: "09:00 - 12:00 WIB") ---
-    final String formattedTime = 
-        '${_startTime.format(context)} - ${_endTime.format(context)} WIB';
+    try {
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+      final authService = AuthService();
+      await authService.init();
+      final token = authService.getToken();
 
-    final acaraBaru = EventModel(
-      id: DateTime.now().toString(),
-      title: enteredTitle,
-      location: enteredLocation,
-      date: _selectedDate!,
-      description: enteredDescription.isEmpty ? 'Deskripsi acara belum ditambahkan.' : enteredDescription,
-      speakerName: enteredSpeaker.isEmpty ? 'Panitia' : enteredSpeaker,
-      time: formattedTime, // <-- Masukkan jam hasil pilihan ke sini
-    );
+      if (token == null) {
+        throw Exception('Token not found');
+      }
 
-    widget.onSimpan(acaraBaru);
-    Navigator.of(context).pop();
+      // Format time untuk backend (HH:mm:ss)
+      final timeString = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}:00';
+      
+      // Format date untuk backend (YYYY-MM-DD)
+      final dateString = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+
+      final success = await eventProvider.createEvent(
+        token: token,
+        title: enteredTitle,
+        description: enteredDescription.isEmpty ? 'Deskripsi acara' : enteredDescription,
+        location: enteredLocation,
+        date: dateString,
+        time: timeString,
+        category: enteredCategory.isEmpty ? 'Umum' : enteredCategory,
+        capacity: capacity,
+      );
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Event berhasil dibuat!')),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text('Error'),
+              content: Text(eventProvider.errorMessage ?? 'Gagal membuat event'),
+              actions: [TextButton(child: const Text('Oke'), onPressed: () => Navigator.of(ctx).pop())],
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Terjadi kesalahan: $e'),
+            actions: [TextButton(child: const Text('Oke'), onPressed: () => Navigator.of(ctx).pop())],
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -128,17 +172,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   labelText: 'Lokasi Acara',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.location_on),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // 3. INPUT PEMBICARA
-              TextField(
-                controller: _speakerController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Pembicara',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
                 ),
               ),
               const SizedBox(height: 16),

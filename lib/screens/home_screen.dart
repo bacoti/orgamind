@@ -9,6 +9,7 @@ import 'profile_screen.dart';
 import 'event_list_screen.dart'; // Pastikan import ini ada
 import 'qr_scan_screen.dart';
 import 'user_management_screen.dart';
+import 'admin_dashboard_screen.dart';
 import '../providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -83,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (isAdmin) {
       return [
+        const AdminDashboardScreen(),
         EventListScreen(),
         const UserManagementScreen(),
         const ProfileScreen(),
@@ -103,6 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (isAdmin) {
       return const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.dashboard_outlined),
+          activeIcon: Icon(Icons.dashboard),
+          label: 'Dashboard',
+        ),
         BottomNavigationBarItem(
           icon: Icon(Icons.event_outlined),
           activeIcon: Icon(Icons.event),
