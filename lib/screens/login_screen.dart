@@ -350,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // Role selector (Demo only)
                       DropdownButtonFormField<String>(
-                        initialValue: _selectedRole,
+                        value: _selectedRole,
                         decoration: InputDecoration(
                           labelText: 'Role (demo)',
                           contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),

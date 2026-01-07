@@ -183,6 +183,60 @@ class AuthService {
     await _prefs.remove(_userKey);
   }
 
+  // Forgot Password
+  Future<bool> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.authForgotPassword),
+        headers: ApiConfig.getHeaders(),
+        body: jsonEncode({
+          'email': email,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['success'] == true;
+      }
+      return false;
+    } catch (e) {
+      // ignore: avoid_print
+      print('Forgot password error: $e');
+      return false;
+    }
+  }
+
+  // Change Password
+  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+    try {
+      final token = getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'Not authenticated'};
+      }
+
+      final response = await http.post(
+        Uri.parse(ApiConfig.authChangePassword),
+        headers: ApiConfig.getHeaders(token: token),
+        body: jsonEncode({
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        return {'success': true, 'message': data['message'] ?? 'Password changed successfully'};
+      } else {
+        return {'success': false, 'message': data['message'] ?? 'Failed to change password'};
+      }
+    } catch (e) {
+      // ignore: avoid_print
+      print('Change password error: $e');
+      return {'success': false, 'message': 'Network error occurred'};
+    }
+  }
+
   // Helper: Convert User to JSON string
   String _userToJsonString(User user) {
     return jsonEncode(user.toJson());

@@ -246,7 +246,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
 
                       DropdownButtonFormField<String>(
-                        initialValue: _selectedRole,
+                        value: _selectedRole,
                         decoration: InputDecoration(
                           labelText: 'Role (demo)',
                           contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),

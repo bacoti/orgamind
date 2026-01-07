@@ -1,6 +1,7 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { register, login, forgotPassword } = require('../controllers/authController');
+const { register, login, forgotPassword, changePassword } = require('../controllers/authController');
+const { authenticate } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -31,6 +32,17 @@ router.post(
   '/forgot-password',
   [body('email').isEmail().withMessage('Valid email is required')],
   forgotPassword
+);
+
+// Change Password (requires authentication)
+router.post(
+  '/change-password',
+  authenticate,
+  [
+    body('currentPassword').notEmpty().withMessage('Current password is required'),
+    body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters'),
+  ],
+  changePassword
 );
 
 module.exports = router;

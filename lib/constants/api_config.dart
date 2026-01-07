@@ -9,6 +9,7 @@ class ApiConfig {
   static const String authRegister = '$baseUrl/auth/register';
   static const String authLogin = '$baseUrl/auth/login';
   static const String authForgotPassword = '$baseUrl/auth/forgot-password';
+  static const String authChangePassword = '$baseUrl/auth/change-password';
   
   // User Endpoints
   static const String userProfile = '$baseUrl/users/profile';

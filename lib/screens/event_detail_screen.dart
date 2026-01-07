@@ -7,6 +7,7 @@ import '../constants/theme.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/event_model.dart';
+import 'edit_event_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -77,7 +78,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             IconButton(
               tooltip: 'Edit',
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Edit acara (demo)')));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EditEventScreen(event: widget.event),
+                  ),
+                ).then((result) {
+                  if (result == true) {
+                    Navigator.pop(context, true); // Kembali dan refresh
+                  }
+                });
               },
               icon: const Icon(Icons.edit, color: AppColors.primary),
             ),

@@ -133,4 +133,56 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-module.exports = { register, login, forgotPassword };
+// Change Password (authenticated user)
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return sendError(res, 'Current password and new password are required', [], 400);
+    }
+
+    if (newPassword.length < 6) {
+      return sendError(res, 'New password must be at least 6 characters', [], 400);
+    }
+
+    const connection = await pool.getConnection();
+
+    // Get current user password
+    const [users] = await connection.query(
+      'SELECT password FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      connection.release();
+      return sendError(res, 'User not found', [], 404);
+    }
+
+    // Verify current password
+    const isPasswordValid = await comparePassword(currentPassword, users[0].password);
+    if (!isPasswordValid) {
+      connection.release();
+      return sendError(res, 'Current password is incorrect', [], 401);
+    }
+
+    // Hash new password
+    const hashedPassword = await hashPassword(newPassword);
+
+    // Update password
+    await connection.query(
+      'UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?',
+      [hashedPassword, userId]
+    );
+
+    connection.release();
+
+    sendSuccess(res, null, 'Password changed successfully');
+  } catch (error) {
+    console.error('Change password error:', error);
+    sendError(res, 'Failed to change password', [error.message], 500);
+  }
+};
+
+module.exports = { register, login, forgotPassword, changePassword };

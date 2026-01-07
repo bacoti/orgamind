@@ -45,26 +45,35 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (_formKey.currentState!.validate()) {
       LoadingDialog.show(context, message: AppStrings.loading);
 
-      // TODO: Implement forgot password functionality in AuthProvider
-      // For now, simulate success
-      await Future.delayed(const Duration(seconds: 2));
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final success = await authProvider.forgotPassword(_emailController.text.trim());
 
       if (mounted) {
         LoadingDialog.hide(context);
 
-        CustomAlertDialog.show(
-          context,
-          title: AppStrings.success,
-          message: 'Link reset password telah dikirim ke email Anda',
-          actionLabel: AppStrings.ok,
-          onAction: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const LoginScreen(),
-              ),
-            );
-          },
-        );
+        if (success) {
+          CustomAlertDialog.show(
+            context,
+            title: AppStrings.success,
+            message: 'Link reset password telah dikirim ke email Anda',
+            actionLabel: AppStrings.ok,
+            onAction: () {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+              );
+            },
+          );
+        } else {
+          CustomAlertDialog.show(
+            context,
+            title: 'Gagal',
+            message: authProvider.errorMessage ?? 'Email tidak ditemukan atau terjadi kesalahan',
+            actionLabel: AppStrings.ok,
+            onAction: () {},
+          );
+        }
       }
     }
   }

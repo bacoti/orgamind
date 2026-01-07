@@ -91,12 +91,13 @@ const createEvent = async (req, res) => {
 const updateEvent = async (req, res) => {
   try {
     const userId = req.userId;
+    const userRole = req.userRole;
     const { id } = req.params;
     const { title, description, location, date, time, category, capacity, imageUrl } = req.body;
 
     const connection = await pool.getConnection();
 
-    // Check if user is the organizer
+    // Check if event exists
     const [events] = await connection.query(
       'SELECT organizer_id FROM events WHERE id = ?',
       [id]
@@ -107,7 +108,8 @@ const updateEvent = async (req, res) => {
       return sendError(res, 'Event not found', [], 404);
     }
 
-    if (events[0].organizer_id !== userId) {
+    // Admin can edit any event, organizer can only edit their own
+    if (userRole !== 'admin' && events[0].organizer_id !== userId) {
       connection.release();
       return sendError(res, 'You are not authorized to update this event', [], 403);
     }
@@ -132,6 +134,7 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
   try {
     const userId = req.userId;
+    const userRole = req.userRole;
     const { id } = req.params;
 
     const connection = await pool.getConnection();
@@ -146,7 +149,8 @@ const deleteEvent = async (req, res) => {
       return sendError(res, 'Event not found', [], 404);
     }
 
-    if (events[0].organizer_id !== userId) {
+    // Admin can delete any event, organizer can only delete their own
+    if (userRole !== 'admin' && events[0].organizer_id !== userId) {
       connection.release();
       return sendError(res, 'You are not authorized to delete this event', [], 403);
     }

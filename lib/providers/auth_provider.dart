@@ -128,6 +128,53 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Forgot Password
+  Future<bool> forgotPassword(String email) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final success = await _authService.forgotPassword(email);
+
+      _isLoading = false;
+      notifyListeners();
+      
+      if (!success) {
+        _errorMessage = 'Email tidak ditemukan';
+      }
+      return success;
+    } catch (e) {
+      _errorMessage = 'Terjadi kesalahan: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Change Password
+  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final result = await _authService.changePassword(currentPassword, newPassword);
+
+      _isLoading = false;
+      if (!result['success']) {
+        _errorMessage = result['message'];
+      }
+      notifyListeners();
+      return result;
+    } catch (e) {
+      _errorMessage = 'Terjadi kesalahan: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+      return {'success': false, 'message': _errorMessage};
+    }
+  }
+
   // Clear error message
   void clearError() {
     _errorMessage = null;
