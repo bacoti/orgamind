@@ -26,48 +26,33 @@ class AdminDashboardScreen extends StatefulWidget {
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminDashboardScreenState extends State<AdminDashboardScreen>
-    with SingleTickerProviderStateMixin {
-  AnimationController? _animationController;
-  Animation<double>? _fadeAnimation;
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _initAnimation();
-    _loadDashboardData();
-  }
-
-  void _initAnimation() {
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController!, curve: Curves.easeOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController?.dispose();
-    super.dispose();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _loadDashboardData();
+      }
+    });
   }
 
   Future<void> _loadDashboardData() async {
     if (!mounted) return;
+
     setState(() => _isLoading = true);
 
-    // Reset animation for refresh
-    _animationController?.reset();
-
-    final eventProvider = Provider.of<EventProvider>(context, listen: false);
-    await eventProvider.getAllEvents();
+    try {
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+      await eventProvider.getAllEvents();
+    } catch (e) {
+      debugPrint('Error loading dashboard: $e');
+    }
 
     if (!mounted) return;
     setState(() => _isLoading = false);
-    _animationController?.forward();
   }
 
   String _getGreeting() {
@@ -80,13 +65,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
 
   String _getTodayDate() {
     return DateFormat('EEEE, dd MMMM yyyy', 'id_ID').format(DateTime.now());
-  }
-
-  Widget _buildAnimatedWidget(Widget child) {
-    if (_fadeAnimation == null) {
-      return child;
-    }
-    return FadeTransition(opacity: _fadeAnimation!, child: child);
   }
 
   @override
@@ -103,24 +81,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
             _buildEnhancedAppBar(),
 
             // Welcome Card
-            SliverToBoxAdapter(
-              child: _buildAnimatedWidget(_buildWelcomeCard()),
-            ),
+            SliverToBoxAdapter(child: _buildWelcomeCard()),
 
             // Statistics Cards
-            SliverToBoxAdapter(
-              child: _buildAnimatedWidget(_buildStatisticsSection()),
-            ),
+            SliverToBoxAdapter(child: _buildStatisticsSection()),
 
             // Quick Actions
-            SliverToBoxAdapter(
-              child: _buildAnimatedWidget(_buildQuickActionsSection()),
-            ),
+            SliverToBoxAdapter(child: _buildQuickActionsSection()),
 
             // Recent Events Header
-            SliverToBoxAdapter(
-              child: _buildAnimatedWidget(_buildRecentEventsHeader()),
-            ),
+            SliverToBoxAdapter(child: _buildRecentEventsHeader()),
 
             // Events List
             _buildEventsList(),
@@ -933,41 +903,53 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen>
   Widget _buildEventsList() {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
-        if (_isLoading || eventProvider.isLoading) {
+        try {
+          if (_isLoading || eventProvider.isLoading) {
+            return SliverToBoxAdapter(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(color: AppColors.primary),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Memuat data...',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final events = eventProvider.events;
+
+          if (events.isEmpty) {
+            return SliverToBoxAdapter(child: _buildEmptyState());
+          }
+
+          return SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final event = events[index];
+                return _buildEnhancedEventCard(event, index);
+              }, childCount: events.length > 5 ? 5 : events.length),
+            ),
+          );
+        } catch (e) {
+          // Return a valid Sliver widget even on error
           return SliverToBoxAdapter(
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
-                child: Column(
-                  children: [
-                    CircularProgressIndicator(color: AppColors.primary),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Memuat data...',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
+                child: Text('Error loading events: $e'),
               ),
             ),
           );
         }
-
-        final events = eventProvider.events;
-
-        if (events.isEmpty) {
-          return SliverToBoxAdapter(child: _buildEmptyState());
-        }
-
-        return SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate((context, index) {
-              final event = events[index];
-              return _buildEnhancedEventCard(event, index);
-            }, childCount: events.length > 5 ? 5 : events.length),
-          ),
-        );
       },
     );
   }

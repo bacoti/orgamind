@@ -23,7 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
   final _formKey = GlobalKey<FormState>();
-  String _selectedRole = 'participant';
 
   @override
   void initState() {
@@ -48,7 +47,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (value == null || value.isEmpty) {
       return AppStrings.emailRequired;
     }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
     if (!emailRegex.hasMatch(value)) {
       return AppStrings.emailInvalid;
     }
@@ -76,7 +77,6 @@ class _LoginScreenState extends State<LoginScreen> {
       final success = await authProvider.login(
         _emailController.text.trim(),
         _passwordController.text,
-        role: _selectedRole,
       );
 
       if (mounted) {
@@ -85,9 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (success) {
           // Navigate to home screen immediately after successful login
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
           );
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -97,8 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
           CustomAlertDialog.show(
             context,
             title: AppStrings.error,
-            message:
-                authProvider.errorMessage ?? 'Gagal melakukan login',
+            message: authProvider.errorMessage ?? 'Gagal melakukan login',
             actionLabel: AppStrings.ok,
           );
         }
@@ -120,25 +117,25 @@ class _LoginScreenState extends State<LoginScreen> {
               Text(
                 'Masuk',
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.black,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.black,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Selamat kembali!',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black,
-                    ),
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.black,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Masuk untuk melanjutkan',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.gray600,
-                    ),
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.gray600,
+                ),
               ),
               const SizedBox(height: 32),
 
@@ -153,9 +150,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text(
                           AppStrings.email,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
@@ -163,9 +159,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           focusNode: _emailFocus,
                           validator: _validateEmail,
                           keyboardType: TextInputType.emailAddress,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.black,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.black),
                           decoration: InputDecoration(
                             hintText: 'contoh@email.com',
                             prefixIcon: const Icon(
@@ -217,9 +212,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
                         Text(
                           AppStrings.password,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
@@ -227,9 +221,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           focusNode: _passwordFocus,
                           validator: _validatePassword,
                           obscureText: _obscurePassword,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.black,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.black),
                           decoration: InputDecoration(
                             hintText: '••••••••',
                             prefixIcon: const Icon(
@@ -295,7 +288,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
-                              builder: (context) => const ForgotPasswordScreen(),
+                              builder: (context) =>
+                                  const ForgotPasswordScreen(),
                             ),
                           );
                         },
@@ -306,7 +300,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         child: Text(
                           AppStrings.forgotPassword,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -341,28 +336,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(width: 8),
                         Text(
                           'Ingat saya',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                       ],
                     ),
 
-                      // Role selector (Demo only)
-                      DropdownButtonFormField<String>(
-                        value: _selectedRole,
-                        decoration: InputDecoration(
-                          labelText: 'Role (demo)',
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'participant', child: Text('Peserta')),
-                          DropdownMenuItem(value: 'admin', child: Text('Admin (Demo)')),
-                        ],
-                        onChanged: (value) => setState(() => _selectedRole = value ?? 'participant'),
-                      ),
-                      const SizedBox(height: 16),
                     const SizedBox(height: 24),
 
                     // Login Button
@@ -391,35 +370,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // ignore: sized_box_for_whitespace
                   Expanded(
-                    child: Container(
-                      height: 1,
-                      color: const Color(0xFFDDDDDD),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Role selection is demo-only. Admin role should be assigned by server in production.',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
-                    ),
+                    child: Container(height: 1, color: const Color(0xFFDDDDDD)),
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       'atau',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF999999),
-                          ),
+                        color: const Color(0xFF999999),
+                      ),
                     ),
                   ),
                   Expanded(
                     // ignore: sized_box_for_whitespace
-                    child: Container(
-                      height: 1,
-                      color: const Color(0xFFDDDDDD),
-                    ),
+                    child: Container(height: 1, color: const Color(0xFFDDDDDD)),
                   ),
                 ],
               ),
@@ -435,10 +399,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     // TODO: Implement Google sign in
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: Color(0xFFE5E5E5),
-                      width: 1,
-                    ),
+                    side: const BorderSide(color: Color(0xFFE5E5E5), width: 1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -509,8 +470,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Masuk dengan Google',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.gray700,
-                            ),
+                          color: AppColors.gray700,
+                        ),
                       ),
                     ],
                   ),
@@ -527,8 +488,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       TextSpan(
                         text: 'Belum punya akun? ',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.gray600,
-                            ),
+                          color: AppColors.gray600,
+                        ),
                       ),
                       WidgetSpan(
                         child: GestureDetector(
@@ -541,7 +502,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                           child: Text(
                             AppStrings.register,
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
                                 ),

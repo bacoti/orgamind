@@ -22,7 +22,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
   final _formKey = GlobalKey<FormState>();
-  String _selectedRole = 'participant';
 
   @override
   void initState() {
@@ -55,7 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value == null || value.isEmpty) {
       return 'Harus diisi.';
     }
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
     if (!emailRegex.hasMatch(value)) {
       return 'Harus menggunakan format email yang benar.';
     }
@@ -70,7 +71,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (value.length < 8) {
       return 'Password minimal 8 karakter, mengandung huruf & angka.';
     }
-    if (!RegExp(r'[A-Za-z]').hasMatch(value) || !RegExp(r'[0-9]').hasMatch(value)) {
+    if (!RegExp(r'[A-Za-z]').hasMatch(value) ||
+        !RegExp(r'[0-9]').hasMatch(value)) {
       return 'Password minimal 8 karakter, mengandung huruf & angka.';
     }
     return null;
@@ -114,7 +116,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _emailController.text.trim(),
         _passwordController.text,
         _confirmPasswordController.text,
-        role: _selectedRole,
       );
 
       if (mounted) {
@@ -164,17 +165,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Text(
                 'Daftar',
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.black,
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.black,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Buat akun baru untuk memulai!',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.gray600,
-                    ),
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.gray600,
+                ),
               ),
               const SizedBox(height: 32),
 
@@ -189,18 +190,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Text(
                           'Nama Lengkap',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _nameController,
                           validator: _validateName,
                           keyboardType: TextInputType.name,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.black,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.black),
                           decoration: InputDecoration(
                             hintText: 'Nama Lengkap Anda',
                             prefixIcon: const Icon(
@@ -245,20 +244,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ],
                     ),
 
-                      DropdownButtonFormField<String>(
-                        value: _selectedRole,
-                        decoration: InputDecoration(
-                          labelText: 'Role (demo)',
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'participant', child: Text('Peserta')),
-                          DropdownMenuItem(value: 'admin', child: Text('Admin (Demo)')),
-                        ],
-                        onChanged: (value) => setState(() => _selectedRole = value ?? 'participant'),
-                      ),
-                      const SizedBox(height: 12),
                     const SizedBox(height: 20),
 
                     // Email Field
@@ -267,18 +252,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Text(
                           'Email',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _emailController,
                           validator: _validateEmail,
                           keyboardType: TextInputType.emailAddress,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.black,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.black),
                           decoration: InputDecoration(
                             hintText: 'contoh@email.com',
                             prefixIcon: const Icon(
@@ -330,24 +313,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Text(
                           'Kata Sandi',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _passwordController,
                           validator: _validatePassword,
                           obscureText: _obscurePassword,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.black,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.black),
                           decoration: InputDecoration(
                             hintText: '••••••••',
-                            helperText: 'Minimal 8 karakter dengan huruf & angka',
-                            helperStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: const Color(0xFFB1B1B1),
-                                ),
+                            helperText:
+                                'Minimal 8 karakter dengan huruf & angka',
+                            helperStyle: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: const Color(0xFFB1B1B1)),
                             prefixIcon: const Icon(
                               Icons.lock_outline,
                               color: Color(0xFF999999),
@@ -410,18 +391,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Text(
                           'Konfirmasi Kata Sandi',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                color: AppColors.gray600,
-                              ),
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: AppColors.gray600),
                         ),
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _confirmPasswordController,
                           validator: _validateConfirmPassword,
                           obscureText: _obscureConfirmPassword,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.black,
-                              ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.black),
                           decoration: InputDecoration(
                             hintText: '••••••••',
                             prefixIcon: const Icon(
@@ -437,7 +416,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                               onPressed: () {
                                 setState(() {
-                                  _obscureConfirmPassword = !_obscureConfirmPassword;
+                                  _obscureConfirmPassword =
+                                      !_obscureConfirmPassword;
                                 });
                               },
                             ),
@@ -509,13 +489,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           child: RichText(
                             text: TextSpan(
                               text: 'Saya menyetujui ',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.gray600,
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.gray600),
                               children: [
                                 TextSpan(
                                   text: 'Syarat & Ketentuan',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -524,7 +504,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 const TextSpan(text: ' serta '),
                                 TextSpan(
                                   text: 'Kebijakan Privasi',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
                                         color: AppColors.primary,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -558,34 +539,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Container(
-                      height: 1,
-                      color: const Color(0xFFDDDDDD),
-                    ),
+                    child: Container(height: 1, color: const Color(0xFFDDDDDD)),
                   ),
-                  const SizedBox(width: 8),
+
                   Expanded(
-                    child: Text(
-                      'Role selection is demo-only. Admin role should be assigned by server in production.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.gray500),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color: const Color(0xFFDDDDDD),
-                    ),
+                    child: Container(height: 1, color: const Color(0xFFDDDDDD)),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 24),
-
-              // Role Selection Section
               const SizedBox(height: 24),
 
               // Google Button
@@ -597,10 +559,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     // TODO: Implement Google sign up
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(
-                      color: Color(0xFFE5E5E5),
-                      width: 1,
-                    ),
+                    side: const BorderSide(color: Color(0xFFE5E5E5), width: 1),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -671,8 +630,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Text(
                         'Daftar dengan Google',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.gray700,
-                            ),
+                          color: AppColors.gray700,
+                        ),
                       ),
                     ],
                   ),
@@ -689,8 +648,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       TextSpan(
                         text: 'Sudah punya akun? ',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.gray600,
-                            ),
+                          color: AppColors.gray600,
+                        ),
                       ),
                       WidgetSpan(
                         child: GestureDetector(
@@ -703,7 +662,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           },
                           child: Text(
                             'Masuk',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
                                   color: AppColors.primary,
                                   fontWeight: FontWeight.w600,
                                 ),
