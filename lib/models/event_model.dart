@@ -44,8 +44,9 @@ class EventModel {
       imageUrl: json['image_url'] ?? json['imageUrl'],
       capacity: json['capacity'] ?? 100,
       organizerName: json['organizer_name'] ?? json['organizerName'],
-      participantsCount: json['participants_count'] ?? json['participantsCount'] ?? 0,
-      status: json['status'], 
+      participantsCount:
+          json['participants_count'] ?? json['participantsCount'] ?? 0,
+      status: json['status'],
     );
   }
 

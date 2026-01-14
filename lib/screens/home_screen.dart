@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   // --- (AKHIR PERUBAHAN) ---
 
-
   @override
   void initState() {
     super.initState();
@@ -54,8 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _selectedIndex, // Hanya tampilkan widget di index ini
         children: screens, // Tumpuk semua halaman di sini
       ),
-      // --- (AKHIR PERBAIKAN) ---
 
+      // --- (AKHIR PERBAIKAN) ---
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

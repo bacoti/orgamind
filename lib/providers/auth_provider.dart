@@ -27,7 +27,11 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Login
-  Future<bool> login(String email, String password, {String role = 'participant'}) async {
+  Future<bool> login(
+    String email,
+    String password, {
+    String role = 'participant',
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -59,7 +63,9 @@ class AuthProvider extends ChangeNotifier {
     String name,
     String email,
     String password,
-    String confirmPassword, {String role = 'participant'}) async {
+    String confirmPassword, {
+    String role = 'participant',
+  }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -139,7 +145,7 @@ class AuthProvider extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-      
+
       if (!success) {
         _errorMessage = 'Email tidak ditemukan';
       }
@@ -153,13 +159,19 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Change Password
-  Future<Map<String, dynamic>> changePassword(String currentPassword, String newPassword) async {
+  Future<Map<String, dynamic>> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final result = await _authService.changePassword(currentPassword, newPassword);
+      final result = await _authService.changePassword(
+        currentPassword,
+        newPassword,
+      );
 
       _isLoading = false;
       if (!result['success']) {
