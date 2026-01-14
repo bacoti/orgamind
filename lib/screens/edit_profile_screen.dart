@@ -208,7 +208,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Perubahan tersimpan ke akun kamu.',
+                                        'Perubahan tersimpan ke akun Anda.',
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
                                               color: AppColors.gray600,
