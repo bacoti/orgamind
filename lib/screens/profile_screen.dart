@@ -52,13 +52,6 @@ class ProfileScreen extends StatelessWidget {
         title: const Text('Profil'),
         elevation: 0,
         scrolledUnderElevation: 0,
-        actions: [
-          IconButton(
-            tooltip: 'Keluar',
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () => _confirmLogout(context),
-          ),
-        ],
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
@@ -85,13 +78,6 @@ class ProfileScreen extends StatelessWidget {
                           email: user.email,
                           roleLabel: roleLabel,
                           photoUrl: user.photoUrl,
-                          onEdit: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const EditProfileScreen(),
-                              ),
-                            );
-                          },
                         ),
                       ),
                     ),
@@ -185,14 +171,12 @@ class _ProfileHeader extends StatelessWidget {
     required this.email,
     required this.roleLabel,
     required this.photoUrl,
-    required this.onEdit,
   });
 
   final String name;
   final String email;
   final String roleLabel;
   final String? photoUrl;
-  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -235,15 +219,6 @@ class _ProfileHeader extends StatelessWidget {
                           color: AppColors.white,
                           fontWeight: FontWeight.w800,
                         ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: onEdit,
-                      tooltip: 'Edit Profil',
-                      icon: const Icon(Icons.edit_rounded),
-                      color: AppColors.white,
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withValues(alpha: 0.14),
                       ),
                     ),
                   ],
