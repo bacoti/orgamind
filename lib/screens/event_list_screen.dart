@@ -1,15 +1,13 @@
 // lib/screens/event_list_screen.dart
-// Updated to use real backend API
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:intl/intl.dart';
 import '../providers/event_provider.dart';
-import '../constants/theme.dart';
 import '../services/auth_service.dart';
+import '../constants/theme.dart';
+import '../models/event_model.dart';
 import 'event_detail_screen.dart';
-import 'create_event_screen.dart';
 import 'notification_screen.dart';
 
 class EventListScreen extends StatefulWidget {
@@ -20,236 +18,234 @@ class EventListScreen extends StatefulWidget {
 }
 
 class _EventListScreenState extends State<EventListScreen> {
+  bool _isInit = true;
+
   @override
-  void initState() {
-    super.initState();
-    _loadEvents();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_isInit) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _refreshEvents();
+        }
+      });
+      _isInit = false;
+    }
   }
 
-  Future<void> _loadEvents() async {
-    final eventProvider = Provider.of<EventProvider>(context, listen: false);
+  Future<void> _refreshEvents() async {
     final authService = AuthService();
     await authService.init();
     final token = authService.getToken();
-    
-    await eventProvider.getAllEvents(token: token);
-  }
+    final provider = Provider.of<EventProvider>(context, listen: false);
 
-  void _bukaHalamanInput() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (ctx) => const CreateEventScreen(),
-      ),
-    ).then((_) => _loadEvents()); // Reload setelah create
+    // 1. Ambil Event Publik
+    await provider.getAllEvents(token: token);
+
+    // 2. Ambil Undangan (Agar muncul di list juga)
+    if (token != null) {
+      await provider.getUserInvitations(token);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.gray50,
       appBar: AppBar(
         title: const Text(
-          'Acara Ku',
+          'Daftar Event',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
         actions: [
-          // Tombol Notifikasi
-          Consumer<EventProvider>(
-            builder: (context, eventProvider, child) {
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NotificationScreen(events: eventProvider.events),
-                        ),
-                      );
-                    },
-                  ),
-                  if (eventProvider.events.isNotEmpty)
-                    Positioned(
-                      right: 12,
-                      top: 12,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 8,
-                          minHeight: 8,
-                        ),
-                      ),
-                    ),
-                ],
-              );
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const NotificationScreen(), 
+                ),
+              ).then((_) => _refreshEvents());
             },
           ),
         ],
       ),
-      body: Consumer<EventProvider>(
-        builder: (context, eventProvider, child) {
-          if (eventProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: RefreshIndicator(
+        onRefresh: _refreshEvents,
+        color: AppColors.primary,
+        child: Consumer<EventProvider>(
+          builder: (context, eventProvider, _) {
+            if (eventProvider.isLoading && eventProvider.events.isEmpty) {
+               return const Center(child: CircularProgressIndicator());
+            }
 
-          if (eventProvider.errorMessage != null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error: ${eventProvider.errorMessage}',
-                    style: TextStyle(fontSize: 16, color: Colors.red[600]),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadEvents,
-                    child: const Text('Coba Lagi'),
-                  ),
-                ],
-              ),
-            );
-          }
+            // GABUNGKAN Event Publik + Undangan
+            // Kita pakai Map untuk menghilangkan duplikat berdasarkan ID
+            final Map<int, EventModel> uniqueEvents = {};
 
-          final events = eventProvider.events;
+            // Prioritaskan undangan (karena statusnya 'invited' yang kita butuhkan)
+            for (var event in eventProvider.invitations) {
+              event.status = 'invited'; // Pastikan status invited
+              uniqueEvents[event.id] = event;
+            }
 
-          if (events.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.event_busy, size: 80, color: Colors.grey[300]),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Belum ada acara.',
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                  ),
-                  Text(
-                    'Tekan tombol + untuk membuat acara baru.',
-                    style: TextStyle(color: Colors.grey[500]),
-                  ),
-                ],
-              ),
-            );
-          }
+            // Masukkan event publik (jangan timpa jika sudah ada di undangan)
+            for (var event in eventProvider.events) {
+              if (!uniqueEvents.containsKey(event.id)) {
+                uniqueEvents[event.id] = event;
+              }
+            }
 
-          return RefreshIndicator(
-            onRefresh: _loadEvents,
-            child: ListView.builder(
+            final allEvents = uniqueEvents.values.toList();
+            // Sort berdasarkan tanggal terbaru
+            allEvents.sort((a, b) => b.date.compareTo(a.date));
+
+            if (allEvents.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.event_busy, size: 60, color: Colors.grey[300]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Belum ada event tersedia',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: events.length,
-              itemBuilder: (ctx, index) {
-                final event = events[index];
-                
-                final isConfirmed = event.status == 'Hadir';
-                final statusColor = isConfirmed ? Colors.green.shade50 : Colors.orange.shade50;
-                final statusTextColor = isConfirmed ? Colors.green : Colors.orange;
+              itemCount: allEvents.length,
+              itemBuilder: (context, index) {
+                final event = allEvents[index];
+                return _buildEventCard(context, event);
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
 
-                return GestureDetector(
-                  onTap: () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EventDetailScreen(event: event),
-                      ),
-                    );
-                    _loadEvents(); // Reload after viewing details
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 16),
+  Widget _buildEventCard(BuildContext context, EventModel event) {
+    // Cek status untuk memberi tanda visual
+    final isInvited = event.status == 'invited';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: isInvited 
+            ? const BorderSide(color: Colors.orange, width: 1.5) // Border oranye jika undangan
+            : BorderSide.none,
+      ),
+      elevation: 2,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetailScreen(event: event),
+            ),
+          ).then((_) {
+            _refreshEvents();
+          });
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Badge Undangan (Jika ada)
+              if (isInvited)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'Undangan Masuk',
+                    style: TextStyle(color: Colors.orange, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon
+                  Container(
+                    width: 60,
+                    height: 60,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(Icons.event, color: AppColors.primary, size: 30),
+                  ),
+                  const SizedBox(width: 16),
+                  // Title & Date
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          event.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateFormat('dd MMM yyyy', 'id_ID').format(event.date),
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Badge Status
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: statusColor,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              event.status,
-                              style: TextStyle(
-                                color: statusTextColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          // Judul
-                          Text(
-                            event.title,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          // Tanggal
-                          Row(
-                            children: [
-                              Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              Text(
-                                DateFormat('dd MMM yyyy').format(event.date),
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          // Lokasi
-                          Row(
-                            children: [
-                              Icon(Icons.location_on_outlined, size: 16, color: Colors.grey[600]),
-                              const SizedBox(width: 8),
-                              Text(
-                                event.location,
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Location
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: 16, color: Colors.grey[600]),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      event.location,
+                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                );
-              },
-            ),
-          );
-        },
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
-      floatingActionButton: Provider.of<AuthProvider>(context).isAdmin
-          ? FloatingActionButton(
-              onPressed: _bukaHalamanInput,
-              backgroundColor: AppColors.primary,
-              child: const Icon(Icons.add, color: Colors.white),
-            )
-          : null,
     );
   }
 }

@@ -1,3 +1,5 @@
+// lib/providers/event_provider.dart
+
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -7,18 +9,18 @@ import '../constants/api_config.dart';
 class EventProvider extends ChangeNotifier {
   List<EventModel> _events = [];
   List<EventModel> _userEvents = [];
+  List<EventModel> _invitations = [];
   EventModel? _selectedEvent;
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Getters
   List<EventModel> get events => _events;
   List<EventModel> get userEvents => _userEvents;
+  List<EventModel> get invitations => _invitations;
   EventModel? get selectedEvent => _selectedEvent;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  // Get All Events
   Future<bool> getAllEvents({String? token}) async {
     _isLoading = true;
     _errorMessage = null;
@@ -32,18 +34,15 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
           _events = (data['data'] as List)
               .map((event) => EventModel.fromJson(event))
               .toList();
-          
           _isLoading = false;
           notifyListeners();
           return true;
         }
       }
-      
       _errorMessage = 'Failed to load events';
       _isLoading = false;
       notifyListeners();
@@ -56,7 +55,6 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Get Event Detail
   Future<bool> getEventDetail(int eventId, {String? token}) async {
     _isLoading = true;
     _errorMessage = null;
@@ -70,7 +68,6 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
           _selectedEvent = EventModel.fromJson(data['data']);
           _isLoading = false;
@@ -78,7 +75,6 @@ class EventProvider extends ChangeNotifier {
           return true;
         }
       }
-      
       _errorMessage = 'Failed to load event detail';
       _isLoading = false;
       notifyListeners();
@@ -91,7 +87,6 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Create Event
   Future<bool> createEvent({
     required String token,
     required String title,
@@ -125,16 +120,13 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
-          // Refresh events list
           await getAllEvents(token: token);
           _isLoading = false;
           notifyListeners();
           return true;
         }
       }
-      
       _errorMessage = 'Failed to create event';
       _isLoading = false;
       notifyListeners();
@@ -147,7 +139,6 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Update Event
   Future<bool> updateEvent({
     required String token,
     required int eventId,
@@ -182,7 +173,6 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
           await getAllEvents(token: token);
           _isLoading = false;
@@ -190,7 +180,6 @@ class EventProvider extends ChangeNotifier {
           return true;
         }
       }
-      
       _errorMessage = 'Failed to update event';
       _isLoading = false;
       notifyListeners();
@@ -203,7 +192,6 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Delete Event
   Future<bool> deleteEvent(int eventId, String token) async {
     _isLoading = true;
     _errorMessage = null;
@@ -217,7 +205,6 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
           await getAllEvents(token: token);
           _isLoading = false;
@@ -225,7 +212,6 @@ class EventProvider extends ChangeNotifier {
           return true;
         }
       }
-      
       _errorMessage = 'Failed to delete event';
       _isLoading = false;
       notifyListeners();
@@ -238,7 +224,6 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Join Event
   Future<bool> joinEvent(int eventId, String token) async {
     _isLoading = true;
     _errorMessage = null;
@@ -252,7 +237,6 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 201 || response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
           await getAllEvents(token: token);
           _isLoading = false;
@@ -262,7 +246,6 @@ class EventProvider extends ChangeNotifier {
           _errorMessage = data['message'] ?? 'Failed to join event';
         }
       }
-      
       _isLoading = false;
       notifyListeners();
       return false;
@@ -274,7 +257,6 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Leave Event
   Future<bool> leaveEvent(int eventId, String token) async {
     _isLoading = true;
     _errorMessage = null;
@@ -288,7 +270,6 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
           await getAllEvents(token: token);
           _isLoading = false;
@@ -296,7 +277,6 @@ class EventProvider extends ChangeNotifier {
           return true;
         }
       }
-      
       _errorMessage = 'Failed to leave event';
       _isLoading = false;
       notifyListeners();
@@ -309,7 +289,6 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Get User Events
   Future<bool> getUserEvents(String token) async {
     _isLoading = true;
     _errorMessage = null;
@@ -323,18 +302,15 @@ class EventProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
         if (data['success'] == true) {
           _userEvents = (data['data'] as List)
               .map((event) => EventModel.fromJson(event))
               .toList();
-          
           _isLoading = false;
           notifyListeners();
           return true;
         }
       }
-      
       _errorMessage = 'Failed to load your events';
       _isLoading = false;
       notifyListeners();
@@ -347,13 +323,170 @@ class EventProvider extends ChangeNotifier {
     }
   }
 
-  // Clear error message
+  Future<bool> inviteParticipants(String eventId, List<int> userIds, String token) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final id = int.tryParse(eventId) ?? 0;
+
+      final response = await http.post(
+        Uri.parse(ApiConfig.eventInvite(id)), 
+        headers: ApiConfig.getHeaders(token: token),
+        body: jsonEncode({
+          'userIds': userIds,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (data['success'] == true) {
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        } else {
+          _errorMessage = data['message'] ?? 'Gagal mengundang peserta';
+        }
+      } else {
+        _errorMessage = data['message'] ?? 'Gagal menghubungi server';
+      }
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Error: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> getUserInvitations(String token) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await http.get(
+        Uri.parse(ApiConfig.userInvitations),
+        headers: ApiConfig.getHeaders(token: token),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          _invitations = (data['data'] as List)
+              .map((event) => EventModel.fromJson(event))
+              .toList();
+          _isLoading = false;
+          notifyListeners();
+          return true;
+        }
+      }
+      _errorMessage = 'Gagal memuat undangan';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _errorMessage = 'Error: $e';
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> respondToInvitation(int eventId, String action, String token) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.eventRespond(eventId)),
+        headers: ApiConfig.getHeaders(token: token),
+        body: jsonEncode({'action': action}),
+      );
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          _invitations.removeWhere((e) => e.id == eventId); 
+          notifyListeners();
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // 12. NEW: Get Event Participants
+  Future<List<dynamic>> getEventParticipants(int eventId, String token) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}/events/$eventId/participants');
+      print('Fetching participants from: $url'); 
+
+      final response = await http.get(
+        url,
+        headers: ApiConfig.getHeaders(token: token),
+      );
+
+      print('Response status: ${response.statusCode}'); 
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          return data['data'] ?? [];
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching participants: $e'); 
+      return [];
+    }
+  }
+
+  // 13. NEW: Admin Update Status
+  Future<bool> updateParticipantStatus(int eventId, String userId, String status, String token) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${ApiConfig.baseUrl}/events/$eventId/participants/$userId'),
+        headers: ApiConfig.getHeaders(token: token),
+        body: jsonEncode({'status': status}),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error updating status: $e");
+      return false;
+    }
+  }
+
+  // 14. NEW: Admin Remove Participant
+  Future<bool> removeParticipant(int eventId, String userId, String token) async {
+    try {
+      final response = await http.delete(
+        Uri.parse('${ApiConfig.baseUrl}/events/$eventId/participants/$userId'),
+        headers: ApiConfig.getHeaders(token: token),
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error removing participant: $e");
+      return false;
+    }
+  }
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();
   }
 
-  // Clear selected event
   void clearSelectedEvent() {
     _selectedEvent = null;
     notifyListeners();

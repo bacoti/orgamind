@@ -1,13 +1,16 @@
 // lib/screens/event_detail_screen.dart
-// (VERSI UPDATE - TOMBOL HADIR/TOLAK SUDAH BERFUNGSI)
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../constants/theme.dart';
 import 'package:provider/provider.dart';
+import '../constants/theme.dart';
 import '../providers/auth_provider.dart';
+import '../providers/event_provider.dart';
+import '../services/auth_service.dart';
 import '../models/event_model.dart';
 import 'edit_event_screen.dart';
+import 'invite_participants_screen.dart';
+import 'participant_list_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -20,46 +23,63 @@ class EventDetailScreen extends StatefulWidget {
 
 class _EventDetailScreenState extends State<EventDetailScreen> {
   late String _currentStatus;
+  bool _isProcessing = false;
 
   @override
   void initState() {
     super.initState();
-    _currentStatus = widget.event.status; // Ambil status awal
+    // Default to 'unknown' if null, but usually passed as 'invited' from notification
+    _currentStatus = widget.event.status ?? 'unknown'; 
   }
 
-  // Fungsi update status
-  void _updateStatus(String newStatus) {
-    setState(() {
-      _currentStatus = newStatus;
-      widget.event.status = newStatus; // Update data asli
-    });
+  Future<void> _handleInvitationResponse(String action) async {
+    setState(() => _isProcessing = true);
 
-    // Pesan Pop-up beda-beda tergantung pilihan
-    String title = newStatus == 'Hadir' ? 'Berhasil!' : 'Dibatalkan';
-    String content = newStatus == 'Hadir' 
-        ? 'Kehadiran Anda telah dikonfirmasi. Sampai jumpa!' 
-        : 'Anda telah menolak undangan ini.';
+    try {
+      final authService = AuthService();
+      await authService.init();
+      final token = authService.getToken();
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx); // Tutup Dialog
-              Navigator.pop(context, true); // Kembali ke List & Refresh
-            },
-            child: const Text('OK'),
-          )
-        ],
-      ),
-    );
+      if (token != null && mounted) {
+        final success = await Provider.of<EventProvider>(context, listen: false)
+            .respondToInvitation(widget.event.id, action, token);
+
+        if (mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(action == 'accept' ? 'Undangan diterima!' : 'Undangan ditolak'),
+                backgroundColor: action == 'accept' ? Colors.green : Colors.red,
+              ),
+            );
+            Navigator.pop(context, true); // Return true to refresh list
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Gagal memproses permintaan'), backgroundColor: Colors.red),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isProcessing = false);
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isAdmin = Provider.of<AuthProvider>(context, listen: false).isAdmin;
+    
+    // Logic to show buttons: MUST be 'invited' status and NOT admin
+    final showActionButtons = _currentStatus == 'invited' && !isAdmin;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -74,7 +94,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          if (Provider.of<AuthProvider>(context).isAdmin)
+          if (isAdmin) ...[
             IconButton(
               tooltip: 'Edit',
               onPressed: () {
@@ -84,15 +104,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     builder: (context) => EditEventScreen(event: widget.event),
                   ),
                 ).then((result) {
-                  if (result == true) {
-                    Navigator.pop(context, true); // Kembali dan refresh
-                  }
+                  if (result == true) Navigator.pop(context, true);
                 });
               },
               icon: const Icon(Icons.edit, color: AppColors.primary),
             ),
-          if (Provider.of<AuthProvider>(context).isAdmin)
-            IconButton(
+             IconButton(
               tooltip: 'Delete',
               onPressed: () {
                 showDialog(
@@ -107,12 +124,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   Navigator.of(ctx).pop();
                                   Navigator.of(context).pop(true);
                                 },
-                                child: const Text('Hapus')),
+                                child: const Text('Hapus', style: TextStyle(color: Colors.red))),
                           ],
                         ));
               },
               icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
             ),
+          ],
         ],
       ),
       body: Column(
@@ -122,12 +140,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Placeholder Gambar (neutral background)
                   Container(
                     width: double.infinity,
                     height: 200,
-                    color: AppColors.white,
-                    child: Icon(Icons.image, size: 80, color: AppColors.gray300),
+                    color: AppColors.gray50,
+                    child: widget.event.imageUrl != null 
+                        ? Image.network(widget.event.imageUrl!, fit: BoxFit.cover, 
+                            errorBuilder: (c, o, s) => Icon(Icons.image, size: 80, color: AppColors.gray300))
+                        : Icon(Icons.image, size: 80, color: AppColors.gray300),
                   ),
                   
                   Padding(
@@ -135,6 +155,20 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (widget.event.category != null)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              widget.event.category!,
+                              style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+
                         Text(
                           widget.event.title,
                           style: const TextStyle(
@@ -148,47 +182,82 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         _buildInfoRow(Icons.access_time, widget.event.time),
                         const SizedBox(height: 12),
                         _buildInfoRow(Icons.location_on, widget.event.location),
+                        const SizedBox(height: 12),
+                        _buildInfoRow(Icons.person, "Penyelenggara: ${widget.event.organizerName ?? 'Admin'}"),
                         
-                        // --- STATUS SAAT INI (BARU) ---
-                        const SizedBox(height: 20),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(_currentStatus).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: _getStatusColor(_currentStatus)),
-                          ),
-                          child: Text(
-                            'Status: $_currentStatus',
-                            style: TextStyle(
-                              color: _getStatusColor(_currentStatus),
-                              fontWeight: FontWeight.bold,
+                        if (!isAdmin) ...[
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(_currentStatus).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: _getStatusColor(_currentStatus)),
+                            ),
+                            child: Text(
+                              'Status Anda: ${_translateStatus(_currentStatus)}',
+                              style: TextStyle(
+                                color: _getStatusColor(_currentStatus),
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        // -----------------------------
-
+                        ],
+                        
                         const SizedBox(height: 30),
                         const Text('Deskripsi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
-                        Text(widget.event.description, style: TextStyle(color: Colors.grey[600], height: 1.5)),
-
-                        const SizedBox(height: 30),
-                        const Text('Pembicara', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            CircleAvatar(radius: 25, backgroundColor: Colors.grey[300]),
-                            const SizedBox(width: 16),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(widget.event.speakerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                Text(widget.event.speakerRole, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                              ],
-                            )
-                          ],
+                        Text(
+                          widget.event.description, 
+                          style: TextStyle(color: Colors.grey[600], height: 1.5)
                         ),
+
+                        if (isAdmin) ...[
+                          const SizedBox(height: 30),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ParticipantListScreen(eventId: widget.event.id),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.people_alt_outlined),
+                              label: const Text('Lihat Daftar Peserta'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => InviteParticipantsScreen(
+                                      eventId: widget.event.id.toString(),
+                                      eventTitle: widget.event.title,
+                                    ),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.person_add_alt_1),
+                              label: const Text('Undang Peserta'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              ),
+                            ),
+                          ),
+                        ],
+                        
                         const SizedBox(height: 50),
                       ],
                     ),
@@ -198,39 +267,40 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
           ),
 
-          // Bottom Action Bar
+          // --- BOTTOM BAR: ACCEPT / REJECT (ONLY SHOW IF INVITED & NOT ADMIN) ---
+          if (showActionButtons) 
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, -4))],
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -4))],
             ),
-            child: Row(
+            child: _isProcessing 
+              ? const Center(child: CircularProgressIndicator())
+              : Row(
               children: [
-                // TOMBOL TOLAK
                 Expanded(
                     child: OutlinedButton(
-                    onPressed: () => _updateStatus('Ditolak'), // Panggil fungsi tolak
+                    onPressed: () => _handleInvitationResponse('reject'),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
                       side: const BorderSide(color: Colors.red),
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Tolak'),
+                    child: const Text('Tolak Undangan'),
                   ),
                 ),
                 const SizedBox(width: 16),
-                // TOMBOL HADIR
                 Expanded(
                     child: ElevatedButton(
-                    onPressed: () => _updateStatus('Hadir'), // Panggil fungsi hadir
+                    onPressed: () => _handleInvitationResponse('accept'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Hadir', style: TextStyle(color: Colors.white)),
+                    child: const Text('Terima Undangan', style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
@@ -241,11 +311,18 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  // Helper untuk warna status
   Color _getStatusColor(String status) {
-    if (status == 'Hadir') return Colors.green;
-    if (status == 'Ditolak') return Colors.red;
-    return Colors.orange;
+    if (status == 'registered') return Colors.green;
+    if (status == 'invited') return Colors.orange;
+    if (status == 'rejected') return Colors.red;
+    return Colors.grey;
+  }
+
+  String _translateStatus(String status) {
+    if (status == 'registered') return 'Terdaftar (Hadir)';
+    if (status == 'invited') return 'Menunggu Konfirmasi (Diundang)';
+    if (status == 'rejected') return 'Undangan Ditolak';
+    return status;
   }
 
   Widget _buildInfoRow(IconData icon, String text) {

@@ -1,9 +1,11 @@
+// lib/constants/api_config.dart
+
 class ApiConfig {
   // Base URL - Ganti sesuai environment
   // Untuk Android Emulator gunakan: http://10.0.2.2:3000/api
   // Untuk iOS Simulator gunakan: http://localhost:3000/api
-  // Untuk Physical Device gunakan: http://YOUR_IP:3000/api
-  static const String baseUrl = 'http://localhost:3000/api';
+  // Untuk Physical Device / Chrome gunakan: http://localhost:3000/api
+  static const String baseUrl = 'http://localhost:3000/api'; 
   
   // Auth Endpoints
   static const String authRegister = '$baseUrl/auth/register';
@@ -27,12 +29,21 @@ class ApiConfig {
   static String eventDelete(int id) => '$baseUrl/events/$id';
   static String eventJoin(int id) => '$baseUrl/events/$id/join';
   static String eventLeave(int id) => '$baseUrl/events/$id/leave';
-  static const String eventUserEvents = '$baseUrl/events/user/events';
+  static const String eventUserEvents = '$baseUrl/events/user/organizer';
   
+  // --- FITUR UNDANGAN (YANG TADI HILANG) ---
+  static const String userInvitations = '$baseUrl/events/user/invitations';
+  static String eventInvite(int id) => '$baseUrl/events/$id/invite';
+  
+  // INI YANG MENYEBABKAN ERROR (Tadi belum ada):
+  static String eventRespond(int id) => '$baseUrl/events/$id/respond';
+  // -----------------------------------------
+
   // Helper method to get authorization header
   static Map<String, String> getHeaders({String? token}) {
     final headers = <String, String>{
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     };
     
     if (token != null) {
