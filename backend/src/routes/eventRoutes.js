@@ -11,6 +11,7 @@ const {
   joinEvent,
   leaveEvent,
   getUserEvents,
+  getUserParticipatingEvents,
   inviteParticipants,
   getUserInvitations,
   respondToInvitation,
@@ -23,7 +24,8 @@ const { authenticate } = require('../middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/', getAllEvents);
-router.get('/:id', getEventDetail);
+// Only match numeric IDs so /events/user/* routes work
+router.get('/:id(\\d+)', getEventDetail);
 
 router.use(authenticate);
 
@@ -38,6 +40,7 @@ router.post(
 );
 
 router.get('/user/organizer', getUserEvents);
+router.get('/user/participant', getUserParticipatingEvents);
 router.get('/user/invitations', getUserInvitations);
 router.get('/:id/participants', getEventParticipants);
 router.post('/:id/invite', inviteParticipants);

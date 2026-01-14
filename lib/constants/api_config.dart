@@ -30,6 +30,7 @@ class ApiConfig {
   static String eventJoin(int id) => '$baseUrl/events/$id/join';
   static String eventLeave(int id) => '$baseUrl/events/$id/leave';
   static const String eventUserEvents = '$baseUrl/events/user/organizer';
+  static const String eventUserParticipating = '$baseUrl/events/user/participant';
   
   // --- FITUR UNDANGAN (YANG TADI HILANG) ---
   static const String userInvitations = '$baseUrl/events/user/invitations';

@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS event_participants (
   id INT PRIMARY KEY AUTO_INCREMENT,
   event_id INT NOT NULL,
   user_id INT NOT NULL,
-  status ENUM('invited', 'registered') DEFAULT 'registered',
+  status ENUM('invited', 'registered', 'rejected') DEFAULT 'registered',
   joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

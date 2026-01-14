@@ -215,6 +215,37 @@ const getUserEvents = async (req, res) => {
   }
 };
 
+// 8b. Get User Participating Events (Dashboard Peserta / Riwayat)
+const getUserParticipatingEvents = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const connection = await pool.getConnection();
+    const [events] = await connection.query(
+      `SELECT e.id, e.title, e.description, e.location, e.date, e.time, e.end_time,
+              e.category, e.image_url, e.capacity,
+              u.name as organizer_name,
+              ep.status, ep.joined_at,
+              (SELECT COUNT(*) FROM event_participants WHERE event_id = e.id AND status = 'registered') as participants_count
+       FROM event_participants ep
+       JOIN events e ON e.id = ep.event_id
+       JOIN users u ON e.organizer_id = u.id
+       WHERE ep.user_id = ?
+         AND ep.status IN ('registered', 'rejected')
+         AND STR_TO_DATE(
+               CONCAT(e.date, ' ', COALESCE(e.end_time, e.time)),
+               '%Y-%m-%d %H:%i:%s'
+             ) <= NOW()
+       ORDER BY e.date DESC, ep.joined_at DESC`,
+      [userId]
+    );
+    connection.release();
+    sendSuccess(res, events);
+  } catch (error) {
+    console.error('Get participating events error:', error);
+    sendError(res, 'Failed to get participating events', [error.message], 500);
+  }
+};
+
 // 9. Invite Participants (Tidak berubah)
 const inviteParticipants = async (req, res) => {
   try {
@@ -335,6 +366,6 @@ const removeParticipant = async (req, res) => {
 
 module.exports = {
   getAllEvents, getEventDetail, createEvent, updateEvent, deleteEvent, joinEvent, leaveEvent,
-  getUserEvents, inviteParticipants, getUserInvitations, respondToInvitation,
+  getUserEvents, getUserParticipatingEvents, inviteParticipants, getUserInvitations, respondToInvitation,
   getEventParticipants, updateParticipantStatus, removeParticipant
 };
