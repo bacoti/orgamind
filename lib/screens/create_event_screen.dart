@@ -1,5 +1,5 @@
 // lib/screens/create_event_screen.dart
-// Updated to use backend API
+// Updated to use backend API with Fixed Date Handling
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -93,6 +93,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       final timeString = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}:00';
       
       // Format date untuk backend (YYYY-MM-DD)
+      // Ini akan mengirim string tanggal murni, database akan menerimanya apa adanya
       final dateString = DateFormat('yyyy-MM-dd').format(_selectedDate!);
 
       final success = await eventProvider.createEvent(
@@ -274,9 +275,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                    onPressed: _submitData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                  onPressed: _submitData,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

@@ -10,6 +10,9 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  // --- PERBAIKAN TANGGAL ---
+  dateStrings: true, // Agar tanggal dibaca apa adanya (String), tidak dikonversi ke UTC
+  timezone: '+07:00' // Memaksa koneksi menggunakan zona waktu WIB (Opsional tapi bagus)
 });
 
 module.exports = pool;
