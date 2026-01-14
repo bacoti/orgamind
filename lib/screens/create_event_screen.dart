@@ -1,5 +1,4 @@
 // lib/screens/create_event_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -19,11 +18,11 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _categoryController = TextEditingController();
-  final _capacityController = TextEditingController(text: '100');
+  final _capacityController = TextEditingController(text: '100'); // Default 100
   
   DateTime? _selectedDate;
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
-  TimeOfDay _endTime = const TimeOfDay(hour: 12, minute: 0); // Default end time
+  TimeOfDay _endTime = const TimeOfDay(hour: 12, minute: 0);
 
   void _pilihTanggal() {
     showDatePicker(
@@ -60,6 +59,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     final enteredLocation = _locationController.text;
     final enteredDescription = _descriptionController.text;
     final enteredCategory = _categoryController.text;
+    // MENGAMBIL NILAI DARI CONTROLLER KAPASITAS
     final capacity = int.tryParse(_capacityController.text) ?? 100;
 
     if (enteredTitle.isEmpty || enteredLocation.isEmpty || _selectedDate == null) {
@@ -82,13 +82,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
       if (token == null) throw Exception('Token not found');
 
-      // Format Start Time (HH:mm:ss)
       final timeString = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}:00';
-      
-      // Format End Time (HH:mm:ss) -- BARU
       final endTimeString = '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}:00';
-      
-      // Format Date (YYYY-MM-DD)
       final dateString = DateFormat('yyyy-MM-dd').format(_selectedDate!);
 
       final success = await eventProvider.createEvent(
@@ -98,9 +93,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         location: enteredLocation,
         date: dateString,
         time: timeString,
-        endTime: endTimeString, // <--- KIRIM END TIME
+        endTime: endTimeString,
         category: enteredCategory.isEmpty ? 'Umum' : enteredCategory,
-        capacity: capacity,
+        capacity: capacity, // MENGIRIM KAPASITAS KE PROVIDER
       );
 
       if (success) {
@@ -108,28 +103,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Event berhasil dibuat!')));
           Navigator.of(context).pop();
         }
-      } else {
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Error'),
-              content: Text(eventProvider.errorMessage ?? 'Gagal membuat event'),
-              actions: [TextButton(child: const Text('Oke'), onPressed: () => Navigator.of(ctx).pop())],
-            ),
-          );
-        }
       }
     } catch (e) {
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Error'),
-            content: Text('Terjadi kesalahan: $e'),
-            actions: [TextButton(child: const Text('Oke'), onPressed: () => Navigator.of(ctx).pop())],
-          ),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
       }
     }
   }
@@ -159,6 +136,20 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 decoration: const InputDecoration(labelText: 'Lokasi Acara', border: OutlineInputBorder(), prefixIcon: Icon(Icons.location_on)),
               ),
               const SizedBox(height: 16),
+
+              // --- TAMBAHAN INPUT KAPASITAS ---
+              TextField(
+                controller: _capacityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Kapasitas Peserta', 
+                  border: OutlineInputBorder(), 
+                  prefixIcon: Icon(Icons.people)
+                ),
+              ),
+              const SizedBox(height: 16),
+              // --------------------------------
+
               TextField(
                 controller: _descriptionController,
                 maxLines: 3,
@@ -166,7 +157,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               const SizedBox(height: 16),
               
-              // ROW: Tanggal, Start Time, End Time
               Row(
                 children: [
                   Expanded(
