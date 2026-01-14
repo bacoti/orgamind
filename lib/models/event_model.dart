@@ -7,12 +7,13 @@ class EventModel {
   final String location;
   final DateTime date;
   final String time;
+  final String? endTime; // <--- FIELD BARU
   final String? category;
   final String? imageUrl;
   final int capacity;
   final String? organizerName;
   final int? participantsCount;
-  String? status; // Ubah jadi nullable agar tidak ada default value yang salah
+  String? status;
 
   EventModel({
     required this.id,
@@ -21,15 +22,15 @@ class EventModel {
     required this.location,
     required this.date,
     required this.time,
+    this.endTime, // <--- Add here
     this.category,
     this.imageUrl,
     this.capacity = 100,
     this.organizerName,
     this.participantsCount,
-    this.status, // Hapus default value di sini
+    this.status,
   });
 
-  // From JSON (dari API backend)
   factory EventModel.fromJson(Map<String, dynamic> json) {
     return EventModel(
       id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
@@ -38,19 +39,16 @@ class EventModel {
       location: json['location'] ?? '',
       date: DateTime.parse(json['date']),
       time: json['time'] ?? '09:00:00',
+      endTime: json['end_time'], // <--- BACA 'end_time' DARI JSON BACKEND
       category: json['category'],
       imageUrl: json['image_url'] ?? json['imageUrl'],
       capacity: json['capacity'] ?? 100,
       organizerName: json['organizer_name'] ?? json['organizerName'],
       participantsCount: json['participants_count'] ?? json['participantsCount'] ?? 0,
-      
-      // PERBAIKAN UTAMA:
-      // Ambil status apa adanya dari backend. JANGAN set default 'Terkonfirmasi'.
       status: json['status'], 
     );
   }
 
-  // To JSON (untuk kirim ke API backend)
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -59,13 +57,13 @@ class EventModel {
       'location': location,
       'date': date.toIso8601String().split('T')[0],
       'time': time,
+      'endTime': endTime, // <--- Sertakan saat serialisasi
       'category': category,
       'imageUrl': imageUrl,
       'capacity': capacity,
     };
   }
 
-  // Helper getters
   String get speakerName => organizerName ?? 'Panitia';
   String get speakerRole => 'Organizer';
 }
