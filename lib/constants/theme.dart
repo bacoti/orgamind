@@ -52,6 +52,7 @@ class AppTheme {
     useMaterial3: true,
     brightness: Brightness.light,
     fontFamily: GoogleFonts.inter().fontFamily,
+    fontFamilyFallback: const ['Noto Sans', 'Roboto', 'Arial'],
     colorScheme: ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       brightness: Brightness.light,
@@ -67,9 +68,7 @@ class AppTheme {
     // Card Theme
     cardTheme: CardThemeData(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: AppColors.white,
     ),
     // Button Themes
@@ -77,13 +76,8 @@ class AppTheme {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.white,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 16,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 1,
         shadowColor: AppColors.primary.withValues(alpha: 0.3),
       ),
@@ -91,77 +85,48 @@ class AppTheme {
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: AppColors.primary,
-        side: const BorderSide(
-          color: AppColors.primary,
-          width: 1.5,
-        ),
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-          vertical: 14,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        side: const BorderSide(color: AppColors.primary, width: 1.5),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primary,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     ),
     // Text Field Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: AppColors.white,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 14,
-      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: Color(0xFFE5E5E5),
-        ),
+        borderSide: const BorderSide(color: Color(0xFFE5E5E5)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: Color(0xFFE5E5E5),
-        ),
+        borderSide: const BorderSide(color: Color(0xFFE5E5E5)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: AppColors.primary,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: AppColors.error,
-        ),
+        borderSide: const BorderSide(color: AppColors.error),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(10),
-        borderSide: const BorderSide(
-          color: AppColors.error,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: AppColors.error, width: 2),
       ),
       labelStyle: const TextStyle(
         color: AppColors.gray600,
         fontSize: 14,
         fontWeight: FontWeight.w500,
       ),
-      hintStyle: const TextStyle(
-        color: Color(0xFF999999),
-        fontSize: 15,
-      ),
+      hintStyle: const TextStyle(color: Color(0xFF999999), fontSize: 15),
     ),
     // Text Themes
     textTheme: TextTheme(
@@ -237,13 +202,8 @@ class AppTheme {
     // Snackbar Theme
     snackBarTheme: SnackBarThemeData(
       backgroundColor: AppColors.gray900,
-      contentTextStyle: GoogleFonts.inter(
-        color: AppColors.white,
-        fontSize: 14,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      contentTextStyle: GoogleFonts.inter(color: AppColors.white, fontSize: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       behavior: SnackBarBehavior.floating,
     ),
   );

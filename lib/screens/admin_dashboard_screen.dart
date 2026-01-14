@@ -211,25 +211,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       // Action Buttons
                       Row(
                         children: [
-                          _buildAppBarAction(
-                            Icons.notifications_outlined,
-                            () {
-                              final eventProvider = Provider.of<EventProvider>(
-                                context,
-                                listen: false,
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NotificationScreen(
-                                    // Hapus parameter events: eventProvider.events jika error, 
-                                    // karena NotificationScreen mengambil data sendiri sekarang.
-                                  ),
+                          _buildAppBarAction(Icons.notifications_outlined, () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NotificationScreen(
+                                  // Hapus parameter events: eventProvider.events jika error,
+                                  // karena NotificationScreen mengambil data sendiri sekarang.
                                 ),
-                              );
-                            },
-                            badge: 3, 
-                          ),
+                              ),
+                            );
+                          }, badge: 3),
                           const SizedBox(width: 8),
                           _buildAppBarAction(
                             Icons.settings_outlined,
@@ -929,19 +921,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           if (events.isEmpty) {
             // --- FIX: MENGHAPUS BOX BESAR "BELUM ADA EVENT" ---
             // Kita ganti dengan SizedBox.shrink() agar kosong/bersih
-            return const SliverToBoxAdapter(child: SizedBox.shrink()); 
+            return const SliverToBoxAdapter(child: SizedBox.shrink());
           }
 
           return SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final event = events[index];
-                  return _buildEnhancedEventCard(event, index);
-                },
-                childCount: events.length > 5 ? 5 : events.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final event = events[index];
+                return _buildEnhancedEventCard(event, index);
+              }, childCount: events.length > 5 ? 5 : events.length),
             ),
           );
         } catch (e) {
@@ -1091,10 +1080,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   Text(
                                     isUpcoming
                                         ? daysUntil == 0
-                                            ? 'Hari Ini'
-                                            : daysUntil == 1
-                                                ? 'Besok'
-                                                : '$daysUntil hari lagi'
+                                              ? 'Hari Ini'
+                                              : daysUntil == 1
+                                              ? 'Besok'
+                                              : '$daysUntil hari lagi'
                                         : 'Selesai',
                                     style: TextStyle(
                                       color: isUpcoming
