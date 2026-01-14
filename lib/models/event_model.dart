@@ -12,7 +12,7 @@ class EventModel {
   final int capacity;
   final String? organizerName;
   final int? participantsCount;
-  String status; // Untuk status lokal (Menunggu Konfirmasi, dll)
+  String? status; // Ubah jadi nullable agar tidak ada default value yang salah
 
   EventModel({
     required this.id,
@@ -26,7 +26,7 @@ class EventModel {
     this.capacity = 100,
     this.organizerName,
     this.participantsCount,
-    this.status = 'Menunggu Konfirmasi',
+    this.status, // Hapus default value di sini
   });
 
   // From JSON (dari API backend)
@@ -43,7 +43,10 @@ class EventModel {
       capacity: json['capacity'] ?? 100,
       organizerName: json['organizer_name'] ?? json['organizerName'],
       participantsCount: json['participants_count'] ?? json['participantsCount'] ?? 0,
-      status: 'Terkonfirmasi', // Default dari backend
+      
+      // PERBAIKAN UTAMA:
+      // Ambil status apa adanya dari backend. JANGAN set default 'Terkonfirmasi'.
+      status: json['status'], 
     );
   }
 
@@ -54,7 +57,7 @@ class EventModel {
       'title': title,
       'description': description,
       'location': location,
-      'date': date.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
+      'date': date.toIso8601String().split('T')[0],
       'time': time,
       'category': category,
       'imageUrl': imageUrl,
@@ -62,7 +65,7 @@ class EventModel {
     };
   }
 
-  // Helper getters untuk backward compatibility
+  // Helper getters
   String get speakerName => organizerName ?? 'Panitia';
   String get speakerRole => 'Organizer';
 }

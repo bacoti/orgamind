@@ -288,6 +288,7 @@ const inviteParticipants = async (req, res) => {
 };
 
 // 10. Get User Invitations (Peserta Action)
+// Update: Mengambil event yang statusnya 'invited' ATAU 'registered'
 const getUserInvitations = async (req, res) => {
   try {
     const userId = req.userId;
@@ -299,7 +300,7 @@ const getUserInvitations = async (req, res) => {
        FROM events e
        JOIN event_participants ep ON e.id = ep.event_id
        JOIN users u ON e.organizer_id = u.id
-       WHERE ep.user_id = ? AND ep.status = 'invited'
+       WHERE ep.user_id = ? AND (ep.status = 'invited' OR ep.status = 'registered')
        ORDER BY e.date ASC`,
       [userId]
     );

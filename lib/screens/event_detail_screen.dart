@@ -28,7 +28,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   @override
   void initState() {
     super.initState();
-    // Default to 'unknown' if null, but usually passed as 'invited' from notification
+    // Gunakan status dari model. Jika null (misal dari list publik), anggap 'unknown'
     _currentStatus = widget.event.status ?? 'unknown'; 
   }
 
@@ -52,7 +52,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 backgroundColor: action == 'accept' ? Colors.green : Colors.red,
               ),
             );
-            Navigator.pop(context, true); // Return true to refresh list
+            Navigator.pop(context, true); // Kembali dan refresh list
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Gagal memproses permintaan'), backgroundColor: Colors.red),
@@ -77,7 +77,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   Widget build(BuildContext context) {
     final isAdmin = Provider.of<AuthProvider>(context, listen: false).isAdmin;
     
-    // Logic to show buttons: MUST be 'invited' status and NOT admin
+    // Logika tombol: HANYA muncul jika status == 'invited' DAN user bukan admin
     final showActionButtons = _currentStatus == 'invited' && !isAdmin;
 
     return Scaffold(
@@ -122,6 +122,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             TextButton(
                                 onPressed: () {
                                   Navigator.of(ctx).pop();
+                                  // Logic delete provider bisa ditambahkan di sini
                                   Navigator.of(context).pop(true);
                                 },
                                 child: const Text('Hapus', style: TextStyle(color: Colors.red))),
@@ -140,6 +141,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Gambar
                   Container(
                     width: double.infinity,
                     height: 200,
@@ -185,6 +187,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         const SizedBox(height: 12),
                         _buildInfoRow(Icons.person, "Penyelenggara: ${widget.event.organizerName ?? 'Admin'}"),
                         
+                        // Status Badge (Untuk User Biasa)
                         if (!isAdmin) ...[
                           const SizedBox(height: 20),
                           Container(
@@ -212,6 +215,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           style: TextStyle(color: Colors.grey[600], height: 1.5)
                         ),
 
+                        // Tombol Admin (Lihat Peserta & Undang)
                         if (isAdmin) ...[
                           const SizedBox(height: 30),
                           SizedBox(
@@ -267,7 +271,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             ),
           ),
 
-          // --- BOTTOM BAR: ACCEPT / REJECT (ONLY SHOW IF INVITED & NOT ADMIN) ---
+          // --- TOMBOL TERIMA / TOLAK (Hanya Muncul Jika Status 'invited') ---
           if (showActionButtons) 
           Container(
             padding: const EdgeInsets.all(16),
