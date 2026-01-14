@@ -32,6 +32,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   void initState() {
     super.initState();
+    // Menggunakan addPostFrameCallback agar aman saat memanggil Provider di awal
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _loadDashboardData();
@@ -933,10 +934,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           return SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final event = events[index];
-                return _buildEnhancedEventCard(event, index);
-              }, childCount: events.length > 5 ? 5 : events.length),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final event = events[index];
+                  return _buildEnhancedEventCard(event, index);
+                },
+                childCount: events.length > 5 ? 5 : events.length,
+              ),
             ),
           );
         } catch (e) {
@@ -1086,10 +1090,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   Text(
                                     isUpcoming
                                         ? daysUntil == 0
-                                              ? 'Hari Ini'
-                                              : daysUntil == 1
-                                              ? 'Besok'
-                                              : '$daysUntil hari lagi'
+                                            ? 'Hari Ini'
+                                            : daysUntil == 1
+                                                ? 'Besok'
+                                                : '$daysUntil hari lagi'
                                         : 'Selesai',
                                     style: TextStyle(
                                       color: isUpcoming
@@ -1247,38 +1251,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  // --- PERBAIKAN: Fungsi ini sudah aman dari crash RenderFlex ---
   Widget _buildEventDetailChip(
     IconData icon,
     String text, {
     bool expanded = false,
   }) {
-    return expanded
-        ? Expanded(
-            child: Row(
-              children: [
-                Icon(icon, size: 14, color: Colors.grey[600]),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    text,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+    return Row(
+      mainAxisSize: MainAxisSize.min, // Agar Row sepadat mungkin
+      children: [
+        Icon(icon, size: 14, color: Colors.grey[600]),
+        const SizedBox(width: 6),
+        // Logika Expanded dipindah ke SINI (hanya untuk Text)
+        expanded
+            ? Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-          )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 14, color: Colors.grey[600]),
-              const SizedBox(width: 6),
-              Text(
+              )
+            : Text(
                 text,
                 style: TextStyle(fontSize: 12, color: Colors.grey[700]),
               ),
-            ],
-          );
+      ],
+    );
   }
 
   Widget _buildEventActionButton(

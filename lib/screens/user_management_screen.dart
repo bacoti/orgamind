@@ -23,7 +23,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUsers();
+    // GANTI DENGAN INI:
+    // "Tunggu frame selesai dibuat, baru load data"
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUsers();
+    });
   }
 
   @override
