@@ -197,7 +197,8 @@ class _ParticipantHistoryScreenState extends State<ParticipantHistoryScreen> {
                       child: _EmptyState(),
                     )
                   else ...[
-                    if (_filter != _HistoryFilter.tidakHadir && hadir.isNotEmpty)
+                    if (_filter != _HistoryFilter.tidakHadir &&
+                        hadir.isNotEmpty)
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
@@ -387,10 +388,7 @@ class _StickyControls extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              _FancyFilterPills(
-                value: filter,
-                onChanged: onFilterChanged,
-              ),
+              _FancyFilterPills(value: filter, onChanged: onFilterChanged),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -519,7 +517,9 @@ class _FancyFilterPills extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.gray50,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.gray200.withValues(alpha: 0.70)),
+            border: Border.all(
+              color: AppColors.gray200.withValues(alpha: 0.70),
+            ),
           ),
           child: Stack(
             children: [
@@ -550,11 +550,7 @@ class _FancyFilterPills extends StatelessWidget {
               ),
               Row(
                 children: [
-                  item(
-                    index: 0,
-                    label: 'Semua',
-                    icon: Icons.grid_view_rounded,
-                  ),
+                  item(index: 0, label: 'Semua', icon: Icons.grid_view_rounded),
                   item(
                     index: 1,
                     label: 'Hadir',
@@ -750,10 +746,7 @@ class _HistoryCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _Pill(
-                          text: statusLabel,
-                          color: statusColor,
-                        ),
+                        _Pill(text: statusLabel, color: statusColor),
                         if (category != null && category.isNotEmpty) ...[
                           const SizedBox(width: 8),
                           _Pill(text: category, color: AppColors.secondaryDark),
@@ -817,7 +810,7 @@ class _HistoryCard extends StatelessWidget {
                                           backgroundColor: AppColors.gray100,
                                           valueColor:
                                               AlwaysStoppedAnimation<Color>(
-                                                  statusColor,
+                                                statusColor,
                                               ),
                                         ),
                                       ),
