@@ -399,8 +399,7 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Tiket Undangan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                            TextButton(onPressed: (){}, child: const Text("Lihat Semua", style: TextStyle(fontSize: 12)))
+                            const Text('Undangan Event', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
                           ],
                         ),
                       ),
