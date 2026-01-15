@@ -1137,10 +1137,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    _buildEventDetailChip(
-                      Icons.location_on,
-                      event.location,
-                      expanded: true,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildEventDetailChip(
+                            Icons.location_on,
+                            event.location,
+                            expanded: false,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
