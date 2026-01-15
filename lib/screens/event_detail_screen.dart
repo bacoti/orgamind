@@ -41,7 +41,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
   @override
   void dispose() {
-    _scrollContgitroller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
