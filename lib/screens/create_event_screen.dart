@@ -1,6 +1,4 @@
 // lib/screens/create_event_screen.dart
-// Updated to use backend API
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -20,15 +18,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _locationController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _categoryController = TextEditingController();
-  final _capacityController = TextEditingController(text: '100');
-  
+  final _capacityController = TextEditingController(text: '100'); // Default 100
+
   DateTime? _selectedDate;
-  
-  // Variabel JAM
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 12, minute: 0);
 
-  // Fungsi Pilih Tanggal
   void _pilihTanggal() {
     showDatePicker(
       context: context,
@@ -43,7 +38,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     });
   }
 
-  // Fungsi Pilih Jam
   Future<void> _pilihJam(bool isStartTime) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -65,15 +59,77 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     final enteredLocation = _locationController.text;
     final enteredDescription = _descriptionController.text;
     final enteredCategory = _categoryController.text;
+    // MENGAMBIL NILAI DARI CONTROLLER KAPASITAS
     final capacity = int.tryParse(_capacityController.text) ?? 100;
 
-    if (enteredTitle.isEmpty || enteredLocation.isEmpty || _selectedDate == null) {
+    if (enteredTitle.isEmpty ||
+        enteredLocation.isEmpty ||
+        _selectedDate == null) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Input Tidak Lengkap'),
-          content: const Text('Mohon pastikan Judul, Lokasi, dan Tanggal terisi.'),
-          actions: [TextButton(child: const Text('Oke'), onPressed: () => Navigator.of(ctx).pop())],
+          content: const Text(
+            'Mohon pastikan Judul, Lokasi, dan Tanggal terisi.',
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Oke'),
+              onPressed: () => Navigator.of(ctx).pop(),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+    final startDateTime = DateTime(
+      _selectedDate!.year,
+      _selectedDate!.month,
+      _selectedDate!.day,
+      _startTime.hour,
+      _startTime.minute,
+    );
+    final endDateTime = DateTime(
+      _selectedDate!.year,
+      _selectedDate!.month,
+      _selectedDate!.day,
+      _endTime.hour,
+      _endTime.minute,
+    );
+
+    if (!endDateTime.isAfter(startDateTime)) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Waktu Tidak Valid'),
+          content: const Text('Jam selesai harus setelah jam mulai.'),
+          actions: [
+            TextButton(
+              child: const Text('Oke'),
+              onPressed: () => Navigator.of(ctx).pop(),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (startDateTime.isBefore(now)) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Waktu Tidak Valid'),
+          content: const Text(
+            'Waktu mulai event tidak boleh di waktu lampau dari sekarang.',
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Oke'),
+              onPressed: () => Navigator.of(ctx).pop(),
+            ),
+          ],
         ),
       );
       return;
@@ -85,25 +141,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       await authService.init();
       final token = authService.getToken();
 
-      if (token == null) {
-        throw Exception('Token not found');
-      }
+      if (token == null) throw Exception('Token not found');
 
-      // Format time untuk backend (HH:mm:ss)
-      final timeString = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}:00';
-      
-      // Format date untuk backend (YYYY-MM-DD)
+      final timeString =
+          '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}:00';
+      final endTimeString =
+          '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}:00';
       final dateString = DateFormat('yyyy-MM-dd').format(_selectedDate!);
 
       final success = await eventProvider.createEvent(
         token: token,
         title: enteredTitle,
-        description: enteredDescription.isEmpty ? 'Deskripsi acara' : enteredDescription,
+        description: enteredDescription.isEmpty
+            ? 'Deskripsi acara'
+            : enteredDescription,
         location: enteredLocation,
         date: dateString,
         time: timeString,
+        endTime: endTimeString,
         category: enteredCategory.isEmpty ? 'Umum' : enteredCategory,
-        capacity: capacity,
+        capacity: capacity, // MENGIRIM KAPASITAS KE PROVIDER
       );
 
       if (success) {
@@ -113,28 +170,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           );
           Navigator.of(context).pop();
         }
-      } else {
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text('Error'),
-              content: Text(eventProvider.errorMessage ?? 'Gagal membuat event'),
-              actions: [TextButton(child: const Text('Oke'), onPressed: () => Navigator.of(ctx).pop())],
-            ),
-          );
-        }
       }
     } catch (e) {
       if (mounted) {
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: const Text('Error'),
-            content: Text('Terjadi kesalahan: $e'),
-            actions: [TextButton(child: const Text('Oke'), onPressed: () => Navigator.of(ctx).pop())],
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
       }
     }
   }
@@ -148,13 +189,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         foregroundColor: Colors.black,
         elevation: 1,
       ),
-      body: SingleChildScrollView( 
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. INPUT JUDUL
               TextField(
                 controller: _titleController,
                 decoration: const InputDecoration(
@@ -164,8 +204,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-
-              // 2. INPUT LOKASI
               TextField(
                 controller: _locationController,
                 decoration: const InputDecoration(
@@ -176,7 +214,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 4. INPUT DESKRIPSI
+              // --- TAMBAHAN INPUT KAPASITAS ---
+              TextField(
+                controller: _capacityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Kapasitas Peserta',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.people),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // --------------------------------
               TextField(
                 controller: _descriptionController,
                 maxLines: 3,
@@ -189,29 +239,36 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               const SizedBox(height: 16),
 
-              // 5. PILIH TANGGAL & JAM (BARIS BARU)
               Row(
                 children: [
-                  // Kotak Tanggal
                   Expanded(
                     flex: 3,
                     child: InkWell(
                       onTap: _pilihTanggal,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 10,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
+                            const Icon(
+                              Icons.calendar_today,
+                              size: 18,
+                              color: Colors.grey,
+                            ),
                             const SizedBox(width: 8),
-                            Expanded( // Agar teks tidak overflow
+                            Expanded(
                               child: Text(
                                 _selectedDate == null
                                     ? 'Pilih Tgl'
-                                    : DateFormat('dd/MM/yy').format(_selectedDate!),
+                                    : DateFormat(
+                                        'dd/MM/yy',
+                                      ).format(_selectedDate!),
                                 style: const TextStyle(fontSize: 14),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -222,14 +279,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  
-                  // Kotak Jam Mulai
                   Expanded(
                     flex: 2,
                     child: InkWell(
-                      onTap: () => _pilihJam(true), // True = Start Time
+                      onTap: () => _pilihJam(true),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 10,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(4),
@@ -241,19 +299,19 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       ),
                     ),
                   ),
-                  
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 5),
                     child: Text("-"),
                   ),
-
-                  // Kotak Jam Selesai
                   Expanded(
                     flex: 2,
                     child: InkWell(
-                      onTap: () => _pilihJam(false), // False = End Time
+                      onTap: () => _pilihJam(false),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 15,
+                          horizontal: 10,
+                        ),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(4),
@@ -267,16 +325,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 32),
-
-              // 6. TOMBOL SIMPAN
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                    onPressed: _submitData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                  onPressed: _submitData,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

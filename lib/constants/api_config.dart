@@ -43,18 +43,26 @@ class ApiConfig {
   static String eventDelete(int id) => '$baseUrl/events/$id';
   static String eventJoin(int id) => '$baseUrl/events/$id/join';
   static String eventLeave(int id) => '$baseUrl/events/$id/leave';
-  static String get eventUserEvents => '$baseUrl/events/user/events';
+  static String get eventUserEvents => '$baseUrl/events/user/organizer';
+  static String get eventUserParticipating => '$baseUrl/events/user/participant';
+
+  // Invitation Endpoints
+  static String get userInvitations => '$baseUrl/events/user/invitations';
+  static String eventInvite(int id) => '$baseUrl/events/$id/invite';
+  static String eventRespond(int id) => '$baseUrl/events/$id/respond';
   
   // Helper method to get authorization header
   static Map<String, String> getHeaders({String? token}) {
     final headers = <String, String>{
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     };
-    
+
     if (token != null) {
       headers['Authorization'] = 'Bearer $token';
     }
-    
+
     return headers;
   }
 }
+

@@ -1,5 +1,4 @@
 // lib/screens/admin_dashboard_screen.dart
-// Admin Dashboard - Mobile Version with comprehensive UI/UX principles
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -214,24 +213,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       // Action Buttons
                       Row(
                         children: [
-                          _buildAppBarAction(
-                            Icons.notifications_outlined,
-                            () {
-                              final eventProvider = Provider.of<EventProvider>(
-                                context,
-                                listen: false,
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NotificationScreen(
-                                    events: eventProvider.events,
-                                  ),
+                          _buildAppBarAction(Icons.notifications_outlined, () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NotificationScreen(
+                                  // Hapus parameter events: eventProvider.events jika error,
+                                  // karena NotificationScreen mengambil data sendiri sekarang.
                                 ),
-                              );
-                            },
-                            badge: 3, // You can make this dynamic
-                          ),
+                              ),
+                            );
+                          }, badge: 3),
                           const SizedBox(width: 8),
                           _buildAppBarAction(
                             Icons.settings_outlined,
@@ -370,15 +362,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
         final events = eventProvider.events;
+        final now = DateTime.now();
         final upcomingEvents = events
-            .where((e) => e.date.isAfter(DateTime.now()))
+            .where((e) => e.effectiveEndDateTime.isAfter(now))
             .length;
         final todayEvents = events
             .where(
               (e) =>
-                  e.date.year == DateTime.now().year &&
-                  e.date.month == DateTime.now().month &&
-                  e.date.day == DateTime.now().day,
+                  e.date.year == now.year &&
+                  e.date.month == now.month &&
+                  e.date.day == now.day,
             )
             .length;
 
@@ -467,11 +460,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
         final events = eventProvider.events;
+        final now = DateTime.now();
         final upcomingEvents = events
-            .where((e) => e.date.isAfter(DateTime.now()))
+            .where((e) => e.effectiveEndDateTime.isAfter(now))
             .toList();
         final pastEvents = events
-            .where((e) => e.date.isBefore(DateTime.now()))
+            .where((e) => !e.effectiveEndDateTime.isAfter(now))
             .toList();
         final totalParticipants = events.fold(
           0,
@@ -527,7 +521,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Semua'),
                         ),
                       ),
                     ),
@@ -543,7 +538,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Mendatang'),
                         ),
                       ),
                     ),
@@ -563,7 +559,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Selesai'),
                         ),
                       ),
                     ),
@@ -890,6 +887,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ==================== FLOATING ACTION BUTTON ====================
   Widget _buildFAB() {
     return FloatingActionButton.extended(
+      heroTag: 'admin_dashboard_fab',
       onPressed: _handleCreateEvent,
       backgroundColor: AppColors.primary,
       elevation: 4,
@@ -929,7 +927,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           final events = eventProvider.events;
 
           if (events.isEmpty) {
-            return SliverToBoxAdapter(child: _buildEmptyState());
+            // --- FIX: MENGHAPUS BOX BESAR "BELUM ADA EVENT" ---
+            // Kita ganti dengan SizedBox.shrink() agar kosong/bersih
+            return const SliverToBoxAdapter(child: SizedBox.shrink());
           }
 
           return SliverPadding(
@@ -957,8 +957,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildEnhancedEventCard(EventModel event, int index) {
-    final isUpcoming = event.date.isAfter(DateTime.now());
-    final daysUntil = event.date.difference(DateTime.now()).inDays;
+    final now = DateTime.now();
+    final isUpcoming = event.effectiveEndDateTime.isAfter(now);
+    final daysUntil = event.startDateTime.isAfter(now)
+        ? event.startDateTime.difference(now).inDays
+        : 0;
     final participantPercentage = event.capacity > 0
         ? ((event.participantsCount ?? 0) / event.capacity * 100).clamp(0, 100)
         : 0.0;
@@ -1249,25 +1252,34 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  // --- PERBAIKAN: Fungsi ini sudah aman dari crash RenderFlex ---
   Widget _buildEventDetailChip(
     IconData icon,
     String text, {
     bool expanded = false,
   }) {
-    return Row(
-      mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
-      children: [
-        Icon(icon, size: 14, color: Colors.grey[600]),
-        const SizedBox(width: 6),
-        expanded
-            ? Flexible(
-                child: Text(
-                  text,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                  overflow: TextOverflow.ellipsis,
+    return expanded
+        ? Expanded(
+            child: Row(
+              children: [
+                Icon(icon, size: 14, color: Colors.grey[600]),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              )
-            : Text(
+              ],
+            ),
+          )
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(
                 text,
                 style: TextStyle(fontSize: 12, color: Colors.grey[700]),
               ),
@@ -1310,7 +1322,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -1322,13 +1334,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.event_busy,
               size: 60,
-              color: AppColors.primary.withValues(alpha: 0.5),
+              color: AppColors.primary.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 24),

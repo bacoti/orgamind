@@ -5,13 +5,21 @@ import 'constants/theme.dart';
 import 'providers/auth_provider.dart';
 import 'providers/event_provider.dart';
 import 'providers/user_provider.dart';
+import 'services/auth_service.dart'; // Import AuthService
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/admin_dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Date Formatting
   await initializeDateFormatting('id_ID', null);
+
+  // CRITICAL: Initialize AuthService before the app starts
+  // This prevents the "LateInitializationError: Field '_prefs' has not been initialized" error
+  await AuthService().init();
+
   runApp(const MyApp());
 }
 
