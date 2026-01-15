@@ -7,6 +7,7 @@ import '../widgets/common_widgets.dart';
 import 'register_screen.dart';
 import 'home_screen.dart';
 import 'forgot_password_screen.dart';
+import 'admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -83,10 +84,16 @@ class _LoginScreenState extends State<LoginScreen> {
         LoadingDialog.hide(context);
 
         if (success) {
-          // Navigate to home screen immediately after successful login
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          // Navigate based on user role
+          if (authProvider.isAdmin) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          }
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text(AppStrings.loginSuccess)),

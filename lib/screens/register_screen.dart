@@ -129,16 +129,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             actionLabel: AppStrings.ok,
             onAction: () {
               Navigator.pop(context); // Close dialog
+              // Navigate to login screen
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
             },
           );
-
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text(AppStrings.registerSuccess)),
-              );
-            }
-          });
         } else {
           CustomAlertDialog.show(
             context,

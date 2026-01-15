@@ -77,17 +77,17 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           if (Provider.of<AuthProvider>(context).isAdmin)
             IconButton(
               tooltip: 'Edit',
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => EditEventScreen(event: widget.event),
                   ),
-                ).then((result) {
-                  if (result == true) {
-                    Navigator.pop(context, true); // Kembali dan refresh
-                  }
-                });
+                );
+                if (result == true && mounted) {
+                  navigator.pop(true); // Kembali dan refresh
+                }
               },
               icon: const Icon(Icons.edit, color: AppColors.primary),
             ),

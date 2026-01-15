@@ -197,6 +197,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
     // Show confirmation dialog before saving
     final confirmed = await _showConfirmationDialog();
     if (confirmed != true) return;
+    if (!mounted) return;
 
     setState(() => _isSaving = true);
 
@@ -294,7 +295,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -386,7 +387,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.delete_forever, color: Colors.red),
@@ -410,7 +411,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -516,7 +517,9 @@ class _UserDetailScreenState extends State<UserDetailScreen>
     if (widget.user == null &&
         _nameController.text.isEmpty &&
         _emailController.text.isEmpty &&
-        _passwordController.text.isEmpty) return true;
+        _passwordController.text.isEmpty) {
+      return true;
+    }
 
     final result = await showDialog<bool>(
       context: context,
@@ -527,7 +530,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.1),
+                color: Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.warning_amber_rounded,
@@ -781,7 +784,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             // Loading Overlay
             if (_isSaving)
               Container(
-                color: Colors.black.withOpacity(0.5),
+                color: Colors.black.withValues(alpha: 0.5),
                 child: Center(
                   child: Card(
                     shape: RoundedRectangleBorder(
@@ -821,7 +824,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
@@ -853,7 +856,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
               end: Alignment.bottomRight,
               colors: [
                 AppColors.primary,
-                AppColors.primary.withOpacity(0.7),
+                AppColors.primary.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -892,7 +895,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Text(
@@ -913,7 +916,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.edit, color: Colors.white, size: 20),
@@ -926,7 +929,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.close, color: Colors.white, size: 20),
@@ -942,7 +945,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             icon: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child:
@@ -963,7 +966,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.1),
+                        color: Colors.red.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child:
@@ -986,9 +989,9 @@ class _UserDetailScreenState extends State<UserDetailScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.1),
+        color: AppColors.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1052,7 +1055,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: AppColors.primary, size: 20),
@@ -1360,7 +1363,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.grey[50],
+          color: isSelected ? color.withValues(alpha: 0.1) : Colors.grey[50],
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? color : Colors.grey[300]!,
@@ -1373,7 +1376,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color:
-                    isSelected ? color.withOpacity(0.2) : Colors.grey[200],
+                    isSelected ? color.withValues(alpha: 0.2) : Colors.grey[200],
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -1414,8 +1417,8 @@ class _UserDetailScreenState extends State<UserDetailScreen>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isAdmin
-            ? Colors.orange.withOpacity(0.1)
-            : Colors.blue.withOpacity(0.1),
+            ? Colors.orange.withValues(alpha: 0.1)
+            : Colors.blue.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isAdmin ? Colors.orange : Colors.blue,
@@ -1427,8 +1430,8 @@ class _UserDetailScreenState extends State<UserDetailScreen>
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isAdmin
-                  ? Colors.orange.withOpacity(0.2)
-                  : Colors.blue.withOpacity(0.2),
+                  ? Colors.orange.withValues(alpha: 0.2)
+                  : Colors.blue.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -1523,7 +1526,7 @@ class _UserDetailScreenState extends State<UserDetailScreen>
               backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
               elevation: 2,
-              shadowColor: AppColors.primary.withOpacity(0.4),
+              shadowColor: AppColors.primary.withValues(alpha: 0.4),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
