@@ -2,14 +2,13 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-// <--- TAMBAHAN BARU 1: Import script createAdmin
-// Naik satu folder (..) karena createAdmin.js ada di folder backend, bukan backend/src
 const createAdmin = require('../createAdmin'); 
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const eventRoutes = require('./routes/eventRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -47,18 +47,18 @@ app.use((err, req, res, next) => {
   });
 });
 
-// <--- TAMBAHAN BARU 2: Bungkus app.listen di dalam createAdmin
 // Start server
 createAdmin().then(() => {
-    app.listen(PORT, () => {
-      console.log(`\n🚀 Server is running on http://localhost:${PORT}`);
-      console.log(`📝 API Documentation:`);
-      console.log(`   - Health Check: GET /api/health`);
-      console.log(`   - Auth: POST /api/auth/register, /api/auth/login, /api/auth/forgot-password`);
-      console.log(`   - Users: GET/PUT /api/users/profile`);
-      console.log(`   - Events: GET /api/events, POST /api/events, etc.`);
-      console.log(`\n`);
-    });
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Server is running on http://localhost:${PORT}`);
+    console.log(`📝 API Documentation:`);
+    console.log(`   - Health Check: GET /api/health`);
+    console.log(`   - Auth: POST /api/auth/register, /api/auth/login, /api/auth/forgot-password`);
+    console.log(`   - Users: GET/PUT /api/users/profile`);
+    console.log(`   - Events: GET /api/events, POST /api/events, etc.`);
+    console.log(`   - Attendance: GET /api/attendance/qr-token/:eventId, POST /api/attendance/scan, POST /api/attendance/manual/:eventId`);
+    console.log(`\n`);
+  });
 });
 
 module.exports = app;

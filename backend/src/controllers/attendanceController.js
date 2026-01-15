@@ -2,7 +2,6 @@ const pool = require('../config/database');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 const { signPayload, verifyToken } = require('../utils/qrUtils');
 
-// Peserta ambil token QR untuk event yang dia sudah "registered"
 const getQrTokenForEvent = async (req, res) => {
   try {
     const userId = req.userId;
@@ -10,7 +9,6 @@ const getQrTokenForEvent = async (req, res) => {
 
     const connection = await pool.getConnection();
 
-    // pastikan peserta terdaftar (registered) di event
     const [rows] = await connection.query(
       'SELECT id, status FROM event_participants WHERE event_id = ? AND user_id = ?',
       [eventId, userId]
@@ -29,7 +27,6 @@ const getQrTokenForEvent = async (req, res) => {
     const token = signPayload({
       eventId: Number(eventId),
       userId: Number(userId),
-      // optional anti replay bisa ditambah expiresAt kalau mau
     });
 
     connection.release();
@@ -40,7 +37,6 @@ const getQrTokenForEvent = async (req, res) => {
   }
 };
 
-// Scan QR => tandai hadir (dipakai admin/scanner device)
 const scanQrCheckIn = async (req, res) => {
   try {
     const { token } = req.body;
@@ -48,14 +44,13 @@ const scanQrCheckIn = async (req, res) => {
 
     let payload;
     try {
-      payload = verifyToken(token); // {eventId, userId}
+      payload = verifyToken(token);
     } catch (e) {
       return sendError(res, e.message || 'QR invalid', [], 400);
     }
 
     const connection = await pool.getConnection();
 
-    // pastikan user yang di-QR memang registered di event tsb
     const [reg] = await connection.query(
       'SELECT status FROM event_participants WHERE event_id = ? AND user_id = ?',
       [payload.eventId, payload.userId]
@@ -63,10 +58,14 @@ const scanQrCheckIn = async (req, res) => {
 
     if (reg.length === 0 || reg[0].status !== 'registered') {
       connection.release();
-      return sendError(res, 'Peserta tidak terdaftar/registered untuk event ini', [], 400);
+      return sendError(
+        res,
+        'Peserta tidak terdaftar/registered untuk event ini',
+        [],
+        400
+      );
     }
 
-    // UPSERT attendance (kalau sudah hadir -> update)
     await connection.query(
       `INSERT INTO event_attendance (event_id, user_id, method, checked_in_by)
        VALUES (?, ?, 'QR', NULL)
@@ -75,14 +74,17 @@ const scanQrCheckIn = async (req, res) => {
     );
 
     connection.release();
-    return sendSuccess(res, { eventId: payload.eventId, userId: payload.userId }, 'Check-in berhasil');
+    return sendSuccess(
+      res,
+      { eventId: payload.eventId, userId: payload.userId },
+      'Check-in berhasil'
+    );
   } catch (error) {
     console.error('scanQrCheckIn error:', error);
     return sendError(res, 'Gagal check-in QR', [error.message], 500);
   }
 };
 
-// Admin manual hadirkan peserta (kalau peserta kendala scan)
 const manualCheckIn = async (req, res) => {
   try {
     const adminId = req.userId;
@@ -91,9 +93,13 @@ const manualCheckIn = async (req, res) => {
 
     if (!userId) return sendError(res, 'userId wajib diisi', [], 400);
 
-    // role check (minimal admin / organizer)
     if (req.userRole !== 'admin') {
-      return sendError(res, 'Hanya admin yang boleh manual check-in', [], 403);
+      return sendError(
+        res,
+        'Hanya admin yang boleh manual check-in',
+        [],
+        403
+      );
     }
 
     const connection = await pool.getConnection();
@@ -105,12 +111,22 @@ const manualCheckIn = async (req, res) => {
 
     if (reg.length === 0) {
       connection.release();
-      return sendError(res, 'User tidak diundang/terdaftar di event ini', [], 400);
+      return sendError(
+        res,
+        'User tidak diundang/terdaftar di event ini',
+        [],
+        400
+      );
     }
 
     if (reg[0].status !== 'registered') {
       connection.release();
-      return sendError(res, 'User belum accept (status belum registered)', [], 400);
+      return sendError(
+        res,
+        'User belum accept (status belum registered)',
+        [],
+        400
+      );
     }
 
     await connection.query(
@@ -121,14 +137,17 @@ const manualCheckIn = async (req, res) => {
     );
 
     connection.release();
-    return sendSuccess(res, { eventId: Number(eventId), userId: Number(userId) }, 'Manual check-in berhasil');
+    return sendSuccess(
+      res,
+      { eventId: Number(eventId), userId: Number(userId) },
+      'Manual check-in berhasil'
+    );
   } catch (error) {
     console.error('manualCheckIn error:', error);
     return sendError(res, 'Gagal manual check-in', [error.message], 500);
   }
 };
 
-// List attendance per event (admin/organizer)
 const listAttendanceByEvent = async (req, res) => {
   try {
     const { eventId } = req.params;

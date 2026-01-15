@@ -10,6 +10,7 @@ import '../services/auth_service.dart';
 import '../models/event_model.dart';
 import 'invite_participants_screen.dart';
 import 'participant_list_screen.dart';
+import 'participant_qr_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -45,12 +46,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     super.dispose();
   }
 
-  // --- LOGIKA FORMAT WAKTU (Mulai - Selesai) ---
   String _getFormattedTime() {
     String formatHHmm(String t) {
       try {
         final parts = t.split(':');
-        return "${parts[0]}:${parts[1]}"; // Ambil HH:mm
+        return "${parts[0]}:${parts[1]}";
       } catch (e) {
         return t;
       }
@@ -82,6 +82,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
 
         if (mounted) {
           if (success) {
+            setState(() {
+              _currentStatus = action == 'accept' ? 'registered' : 'rejected';
+            });
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -93,7 +97,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 behavior: SnackBarBehavior.floating,
               ),
             );
-            Navigator.pop(context, true);
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -118,7 +121,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isAdmin = Provider.of<AuthProvider>(context, listen: false).isAdmin;
-    final showActionButtons = _currentStatus == 'invited' && !isAdmin;
+    final showActionButtons = (_currentStatus == 'invited') && !isAdmin;
+    final showQrButton = (_currentStatus == 'registered') && !isAdmin;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -127,7 +131,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
           CustomScrollView(
             controller: _scrollController,
             slivers: [
-              // --- 1. HEADER IMAGE ---
               SliverAppBar(
                 expandedHeight: 350.0,
                 pinned: true,
@@ -157,13 +160,11 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               widget.event.imageUrl!,
                               fit: BoxFit.cover,
                             )
-                          // --- PERBAIKAN DI SINI (Background Biru) ---
                           : Container(
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.topRight,
                                   end: Alignment.bottomLeft,
-                                  // Menggunakan warna primary dan variasinya agar tetap biru
                                   colors: [
                                     AppColors.primary,
                                     AppColors.primary.withOpacity(0.7),
@@ -177,9 +178,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     right: -50,
                                     child: CircleAvatar(
                                       radius: 100,
-                                      backgroundColor: Colors.white.withOpacity(
-                                        0.1,
-                                      ),
+                                      backgroundColor:
+                                          Colors.white.withOpacity(0.1),
                                     ),
                                   ),
                                   Positioned(
@@ -187,9 +187,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     left: -30,
                                     child: CircleAvatar(
                                       radius: 80,
-                                      backgroundColor: Colors.white.withOpacity(
-                                        0.1,
-                                      ),
+                                      backgroundColor:
+                                          Colors.white.withOpacity(0.1),
                                     ),
                                   ),
                                   const Center(
@@ -202,7 +201,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 ],
                               ),
                             ),
-                      // -------------------------------------------
                       Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
@@ -291,8 +289,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   ),
                 ),
               ),
-
-              // --- 2. KONTEN DETAIL ---
               SliverToBoxAdapter(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -306,17 +302,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // --- ROW INFO: TANGGAL & WAKTU ---
                         Row(
                           children: [
                             Expanded(
                               child: _buildInfoBox(
                                 icon: Icons.calendar_today_rounded,
                                 title: 'Tanggal',
-                                value: DateFormat(
-                                  'dd MMM yyyy',
-                                  'id_ID',
-                                ).format(widget.event.date),
+                                value: DateFormat('dd MMM yyyy', 'id_ID')
+                                    .format(widget.event.date),
                                 color: Colors.blue,
                               ),
                             ),
@@ -331,10 +324,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 24),
-
-                        // --- ORGANIZER ---
                         const Text(
                           'Diselenggarakan oleh',
                           style: TextStyle(
@@ -356,9 +346,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               ),
                               child: CircleAvatar(
                                 radius: 24,
-                                backgroundColor: AppColors.primary.withOpacity(
-                                  0.1,
-                                ),
+                                backgroundColor:
+                                    AppColors.primary.withOpacity(0.1),
                                 child: Text(
                                   (widget.event.organizerName ?? 'A')[0]
                                       .toUpperCase(),
@@ -399,9 +388,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: _getStatusColor(
-                                    _currentStatus,
-                                  ).withOpacity(0.1),
+                                  color: _getStatusColor(_currentStatus)
+                                      .withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -415,12 +403,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               ),
                           ],
                         ),
-
                         const SizedBox(height: 24),
                         const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         const SizedBox(height: 24),
-
-                        // --- DESKRIPSI ---
                         const Text(
                           'Tentang Acara',
                           style: TextStyle(
@@ -438,10 +423,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             fontSize: 15,
                           ),
                         ),
-
                         const SizedBox(height: 30),
-
-                        // --- ADMIN ACTIONS ---
                         if (isAdmin)
                           Column(
                             children: [
@@ -468,15 +450,14 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   MaterialPageRoute(
                                     builder: (context) =>
                                         InviteParticipantsScreen(
-                                          eventId: widget.event.id.toString(),
-                                          eventTitle: widget.event.title,
-                                        ),
+                                      eventId: widget.event.id.toString(),
+                                      eventTitle: widget.event.title,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-
                         const SizedBox(height: 100),
                       ],
                     ),
@@ -570,6 +551,61 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
               ),
             ),
+
+          if (showQrButton && !isAdmin)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 30),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, -5),
+                    ),
+                  ],
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ParticipantQrScreen(eventId: widget.event.id),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 8,
+                      shadowColor: AppColors.primary.withOpacity(0.4),
+                    ),
+                    icon: const Icon(Icons.qr_code_2, color: Colors.white),
+                    label: const Text(
+                      'Tampilkan QR',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -644,7 +680,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
