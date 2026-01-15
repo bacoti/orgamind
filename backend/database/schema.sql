@@ -63,3 +63,22 @@ CREATE TABLE IF NOT EXISTS notifications (
   FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL,
   INDEX idx_user_read (user_id, is_read)
 );
+
+-- Create Event Attendance Table (PRESENSI)
+CREATE TABLE IF NOT EXISTS event_attendance (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  event_id INT NOT NULL,
+  user_id INT NOT NULL,
+  method ENUM('QR','MANUAL') DEFAULT 'QR',
+  checked_in_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  checked_in_by INT NULL,
+
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (checked_in_by) REFERENCES users(id) ON DELETE SET NULL,
+
+  UNIQUE KEY unique_attendance (event_id, user_id),
+  INDEX idx_event (event_id),
+  INDEX idx_user (user_id)
+);
+
