@@ -572,7 +572,7 @@ class _FancyFilterPills extends StatelessWidget {
 }
 
 class _HistoryHeader extends StatelessWidget {
-  _HistoryHeader({
+  const _HistoryHeader({
     required this.total,
     required this.hadir,
     required this.tidakHadir,
@@ -691,7 +691,7 @@ class _HistoryHeader extends StatelessWidget {
 }
 
 class _HistoryCard extends StatelessWidget {
-  _HistoryCard({
+  const _HistoryCard({
     required this.event,
     required this.dateText,
     required this.timeText,
@@ -844,7 +844,7 @@ class _HistoryCard extends StatelessWidget {
 }
 
 class _EventThumbnail extends StatelessWidget {
-  _EventThumbnail({required this.imageUrl, required this.isHadir});
+  const _EventThumbnail({required this.imageUrl, required this.isHadir});
 
   final String? imageUrl;
   final bool isHadir;

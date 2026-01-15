@@ -243,7 +243,7 @@ class _EventListScreenState extends State<EventListScreen>
                                             event.id,
                                           ),
                                         );
-                                        this.setState(() {});
+                                        setState(() {});
                                         Navigator.pop(context);
                                         Navigator.push(
                                           context,
