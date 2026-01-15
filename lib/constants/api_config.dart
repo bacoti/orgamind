@@ -39,7 +39,11 @@ class ApiConfig {
   static String get eventUserEvents => '$baseUrl/events/user/organizer';
   static String get eventUserParticipating => '$baseUrl/events/user/participant';
 
-  // Attendance
+  // Attendance - New Flow (Admin tampilkan QR, Peserta scan)
+  static String eventQrCode(int eventId) => '$baseUrl/attendance/event-qr/$eventId';
+  static String get participantScan => '$baseUrl/attendance/participant-scan';
+
+  // Attendance - Legacy Flow
   static String attendanceQrToken(int eventId) => '$baseUrl/attendance/qr-token/$eventId';
   static String get attendanceScan => '$baseUrl/attendance/scan';
   static String attendanceManual(int eventId) => '$baseUrl/attendance/manual/$eventId';

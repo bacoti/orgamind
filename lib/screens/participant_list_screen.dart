@@ -1,9 +1,12 @@
 // lib/screens/participant_list_screen.dart
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 import '../providers/event_provider.dart';
 import '../services/auth_service.dart';
+import '../constants/api_config.dart';
 
 class ParticipantListScreen extends StatefulWidget {
   final int eventId;
@@ -95,6 +98,51 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
     }
   }
 
+  /// Manual check-in peserta (presensi manual oleh admin)
+  Future<void> _manualCheckIn(String userId) async {
+    final authService = AuthService();
+    await authService.init();
+    final token = authService.getToken();
+    if (token == null) return;
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.attendanceManual(widget.eventId)),
+        headers: ApiConfig.getHeaders(token: token),
+        body: jsonEncode({'userId': int.parse(userId)}),
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Peserta berhasil diabsen (hadir)'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadParticipants();
+      } else {
+        final data = jsonDecode(response.body);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(data['message'] ?? 'Gagal melakukan presensi'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _removeParticipant(String userId) async {
     final authService = AuthService();
     await authService.init();
@@ -159,18 +207,20 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
               itemBuilder: (context, index) {
                 final p = _participants[index];
                 final String userId = p['id'].toString();
-                final String status = p['status'] ?? 'invited';
+                // Gunakan display_status dari backend yang sudah memperhitungkan attendance
+                final String displayStatus = p['display_status'] ?? p['status'] ?? 'invited';
+                final String baseStatus = p['status'] ?? 'invited';
 
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor: _getStatusColor(
-                      status,
+                      displayStatus,
                     ).withValues(alpha: 0.1),
                     child: Text(
                       p['name'] != null && p['name'].toString().isNotEmpty
                           ? p['name'][0].toUpperCase()
                           : '?',
-                      style: TextStyle(color: _getStatusColor(status)),
+                      style: TextStyle(color: _getStatusColor(displayStatus)),
                     ),
                   ),
                   title: Text(
@@ -182,15 +232,27 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
                     children: [
                       Text(p['email'] ?? '-'),
                       const SizedBox(height: 4),
-                      _buildStatusLabel(status),
+                      _buildStatusLabel(displayStatus),
                     ],
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (status != 'registered')
+                      // Tombol Presensi Manual - hanya muncul jika status registered dan belum hadir
+                      if (baseStatus == 'registered' && displayStatus != 'attended')
                         IconButton(
-                          tooltip: 'Hadirkan Peserta',
+                          tooltip: 'Presensi Manual (Hadir)',
+                          icon: const Icon(
+                            Icons.how_to_reg,
+                            color: Colors.teal,
+                          ),
+                          onPressed: () => _manualCheckIn(userId),
+                        ),
+
+                      // Tombol Terima Undangan - hanya untuk status invited
+                      if (displayStatus == 'invited')
+                        IconButton(
+                          tooltip: 'Terima Undangan (Terdaftar)',
                           icon: const Icon(
                             Icons.check_circle_outline,
                             color: Colors.green,
@@ -198,13 +260,14 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
                           onPressed: () => _changeStatus(
                             userId,
                             'registered',
-                            'Peserta berhasil dihadirkan',
+                            'Peserta berhasil terdaftar',
                           ),
                         ),
 
-                      if (status != 'rejected')
+                      // Tombol Tolak - tidak muncul jika sudah hadir
+                      if (displayStatus != 'rejected' && displayStatus != 'attended')
                         IconButton(
-                          tooltip: 'Tandai Tidak Hadir',
+                          tooltip: 'Tolak/Batalkan',
                           icon: const Icon(
                             Icons.cancel_outlined,
                             color: Colors.orange,
@@ -212,7 +275,7 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
                           onPressed: () => _changeStatus(
                             userId,
                             'rejected',
-                            'Peserta ditandai tidak hadir',
+                            'Peserta ditolak/dibatalkan',
                           ),
                         ),
 
@@ -259,23 +322,57 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
   }
 
   Color _getStatusColor(String status) {
-    if (status == 'registered') return Colors.green;
-    if (status == 'invited') return Colors.blue;
-    if (status == 'rejected') return Colors.red;
-    return Colors.grey;
+    switch (status) {
+      case 'attended':
+        return Colors.teal; // Sudah hadir (presensi)
+      case 'registered':
+        return Colors.green; // Terdaftar (terima undangan)
+      case 'invited':
+        return Colors.blue; // Diundang (belum konfirmasi)
+      case 'rejected':
+        return Colors.red; // Ditolak
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _buildStatusLabel(String status) {
-    String label = status;
+    String label;
+    IconData icon;
     Color color = _getStatusColor(status);
 
-    if (status == 'registered') label = 'Hadir';
-    if (status == 'invited') label = 'Diundang';
-    if (status == 'rejected') label = 'Tidak Hadir';
+    switch (status) {
+      case 'attended':
+        label = 'Hadir';
+        icon = Icons.check_circle;
+        break;
+      case 'registered':
+        label = 'Terdaftar';
+        icon = Icons.how_to_reg;
+        break;
+      case 'invited':
+        label = 'Diundang';
+        icon = Icons.mail_outline;
+        break;
+      case 'rejected':
+        label = 'Ditolak';
+        icon = Icons.cancel;
+        break;
+      default:
+        label = status;
+        icon = Icons.help_outline;
+    }
 
-    return Text(
-      label,
-      style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
+        ),
+      ],
     );
   }
 }

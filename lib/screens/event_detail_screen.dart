@@ -1,16 +1,20 @@
 // lib/screens/event_detail_screen.dart
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:http/http.dart' as http;
 import '../constants/theme.dart';
+import '../constants/api_config.dart';
 import '../providers/auth_provider.dart';
 import '../providers/event_provider.dart';
 import '../services/auth_service.dart';
 import '../models/event_model.dart';
 import 'invite_participants_screen.dart';
 import 'participant_list_screen.dart';
-import 'participant_qr_screen.dart';
+import 'participant_scan_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -116,6 +120,95 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }
+  }
+
+  /// Menampilkan dialog QR Code untuk presensi event (Admin Only)
+  void _showQrCodeDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.indigo.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.qr_code_2_rounded,
+                      color: Colors.indigo,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'QR Code Presensi',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    icon: const Icon(Icons.close),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.grey.shade100,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: _QrCodeWidget(eventId: widget.event.id),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Peserta yang terdaftar dapat scan QR ini untuk presensi',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -450,6 +543,13 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               ),
                               const SizedBox(height: 12),
                               _buildAdminActionButton(
+                                icon: Icons.qr_code_2_rounded,
+                                label: 'Tampilkan QR Presensi',
+                                color: Colors.indigo,
+                                onTap: () => _showQrCodeDialog(),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildAdminActionButton(
                                 icon: Icons.person_add_rounded,
                                 label: 'Undang Peserta Baru',
                                 color: Colors.teal,
@@ -590,8 +690,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              ParticipantQrScreen(eventId: widget.event.id),
+                          builder: (_) => ParticipantScanScreen(
+                            eventId: widget.event.id,
+                            eventTitle: widget.event.title,
+                          ),
                         ),
                       );
                     },
@@ -603,9 +705,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       elevation: 8,
                       shadowColor: AppColors.primary.withValues(alpha: 0.4),
                     ),
-                    icon: const Icon(Icons.qr_code_2, color: Colors.white),
+                    icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
                     label: const Text(
-                      'Tampilkan QR',
+                      'Scan QR Presensi',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -729,5 +831,130 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     if (status == 'invited') return 'Menunggu Konfirmasi';
     if (status == 'rejected') return 'Undangan Ditolak';
     return status;
+  }
+}
+
+/// Widget untuk menampilkan QR Code event (digunakan oleh admin)
+class _QrCodeWidget extends StatefulWidget {
+  final int eventId;
+  const _QrCodeWidget({required this.eventId});
+
+  @override
+  State<_QrCodeWidget> createState() => _QrCodeWidgetState();
+}
+
+class _QrCodeWidgetState extends State<_QrCodeWidget> {
+  String? _qrData;
+  String? _error;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _generateQrData();
+  }
+
+  Future<void> _generateQrData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final authService = AuthService();
+      await authService.init();
+      final token = authService.getToken();
+
+      if (token == null) {
+        setState(() {
+          _error = 'Sesi habis, silakan login ulang';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // Admin: Generate QR Code event menggunakan endpoint baru
+      final response = await http.get(
+        Uri.parse(ApiConfig.eventQrCode(widget.eventId)),
+        headers: ApiConfig.getHeaders(token: token),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['success'] == true) {
+        setState(() {
+          _qrData = data['data']['token'];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _error = data['message'] ?? 'Gagal generate QR Code';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Error: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SizedBox(
+        height: 200,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null) {
+      return SizedBox(
+        height: 200,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, color: Colors.red.shade400, size: 48),
+              const SizedBox(height: 12),
+              Text(
+                _error!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.red.shade700),
+              ),
+              const SizedBox(height: 12),
+              TextButton.icon(
+                onPressed: _generateQrData,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Coba Lagi'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        QrImageView(
+          data: _qrData!,
+          version: QrVersions.auto,
+          size: 200,
+          backgroundColor: Colors.white,
+          errorStateBuilder: (ctx, err) => Center(
+            child: Text('Error: $err', style: const TextStyle(color: Colors.red)),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Event ID: ${widget.eventId}',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
+    );
   }
 }

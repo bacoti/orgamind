@@ -419,13 +419,22 @@ const respondToInvitation = async (req, res) => {
   }
 };
 
-// 12. Get Event Participants (Tidak berubah)
+// 12. Get Event Participants (dengan info attendance/kehadiran)
 const getEventParticipants = async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await pool.getConnection();
+    // Join dengan event_attendance untuk cek apakah peserta sudah hadir
     const [participants] = await connection.query(
-      `SELECT u.id, u.name, u.email, ep.status, ep.joined_at FROM event_participants ep JOIN users u ON ep.user_id = u.id WHERE ep.event_id = ? ORDER BY ep.joined_at DESC`,
+      `SELECT u.id, u.name, u.email, ep.status, ep.joined_at,
+              CASE WHEN ea.id IS NOT NULL THEN 'attended' ELSE ep.status END AS display_status,
+              ea.method AS attendance_method,
+              ea.checked_in_at
+       FROM event_participants ep 
+       JOIN users u ON ep.user_id = u.id 
+       LEFT JOIN event_attendance ea ON ea.event_id = ep.event_id AND ea.user_id = ep.user_id
+       WHERE ep.event_id = ? 
+       ORDER BY ep.joined_at DESC`,
       [id]
     );
     connection.release();

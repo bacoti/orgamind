@@ -2,6 +2,124 @@ const pool = require('../config/database');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
 const { signPayload, verifyToken } = require('../utils/qrUtils');
 
+// ============ ADMIN: Generate QR Code untuk Event ============
+// QR Code ini akan ditampilkan oleh admin, dan peserta yang scan
+const getEventQrCode = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const userRole = req.userRole;
+
+    // Hanya admin yang boleh generate QR event
+    if (userRole !== 'admin') {
+      return sendError(res, 'Hanya admin yang dapat generate QR event', [], 403);
+    }
+
+    const connection = await pool.getConnection();
+
+    // Cek apakah event ada
+    const [events] = await connection.query(
+      'SELECT id, title FROM events WHERE id = ?',
+      [eventId]
+    );
+
+    if (events.length === 0) {
+      connection.release();
+      return sendError(res, 'Event tidak ditemukan', [], 404);
+    }
+
+    connection.release();
+
+    // Generate token yang berisi eventId saja (tanpa userId)
+    // Peserta akan menambahkan userId mereka saat scan
+    const token = signPayload({
+      eventId: Number(eventId),
+      type: 'event_checkin',
+      generatedAt: Date.now(),
+    });
+
+    return sendSuccess(res, { 
+      token,
+      eventId: Number(eventId),
+      eventTitle: events[0].title 
+    }, 'QR Code event berhasil dibuat');
+  } catch (error) {
+    console.error('getEventQrCode error:', error);
+    return sendError(res, 'Gagal membuat QR event', [error.message], 500);
+  }
+};
+
+// ============ PESERTA: Scan QR Event untuk Check-in ============
+// Peserta scan QR yang ditampilkan admin
+const participantScanCheckIn = async (req, res) => {
+  try {
+    const userId = req.userId; // Dari token auth peserta
+    const { token } = req.body;
+
+    if (!token) return sendError(res, 'QR token wajib diisi', [], 400);
+
+    let payload;
+    try {
+      payload = verifyToken(token);
+    } catch (e) {
+      return sendError(res, e.message || 'QR Code tidak valid', [], 400);
+    }
+
+    // Pastikan ini QR event (bukan QR tipe lain)
+    if (payload.type !== 'event_checkin') {
+      return sendError(res, 'QR Code tidak valid untuk presensi', [], 400);
+    }
+
+    const eventId = payload.eventId;
+
+    const connection = await pool.getConnection();
+
+    // Cek apakah peserta terdaftar di event ini
+    const [reg] = await connection.query(
+      'SELECT status FROM event_participants WHERE event_id = ? AND user_id = ?',
+      [eventId, userId]
+    );
+
+    if (reg.length === 0) {
+      connection.release();
+      return sendError(res, 'Anda tidak terdaftar di event ini', [], 400);
+    }
+
+    if (reg[0].status !== 'registered') {
+      connection.release();
+      return sendError(res, 'Anda belum menerima undangan event ini', [], 400);
+    }
+
+    // Cek apakah sudah check-in sebelumnya
+    const [existing] = await connection.query(
+      'SELECT id FROM event_attendance WHERE event_id = ? AND user_id = ?',
+      [eventId, userId]
+    );
+
+    if (existing.length > 0) {
+      connection.release();
+      return sendError(res, 'Anda sudah melakukan presensi sebelumnya', [], 400);
+    }
+
+    // Insert attendance
+    await connection.query(
+      `INSERT INTO event_attendance (event_id, user_id, method, checked_in_by)
+       VALUES (?, ?, 'QR', NULL)`,
+      [eventId, userId]
+    );
+
+    connection.release();
+    return sendSuccess(
+      res,
+      { eventId: Number(eventId), userId: Number(userId) },
+      'Presensi berhasil! Anda telah hadir di event ini.'
+    );
+  } catch (error) {
+    console.error('participantScanCheckIn error:', error);
+    return sendError(res, 'Gagal melakukan presensi', [error.message], 500);
+  }
+};
+
+// ============ LEGACY: QR Token untuk Peserta (tetap dipertahankan) ============
 const getQrTokenForEvent = async (req, res) => {
   try {
     const userId = req.userId;
@@ -171,8 +289,10 @@ const listAttendanceByEvent = async (req, res) => {
 };
 
 module.exports = {
-  getQrTokenForEvent,
-  scanQrCheckIn,
+  getEventQrCode,         // Admin: Generate QR untuk event
+  participantScanCheckIn, // Peserta: Scan QR event untuk check-in
+  getQrTokenForEvent,     // Legacy: QR token peserta
+  scanQrCheckIn,          // Legacy: Admin scan QR peserta
   manualCheckIn,
   listAttendanceByEvent,
 };
