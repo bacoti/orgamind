@@ -14,19 +14,21 @@ import 'admin_dashboard_screen.dart';
 import '../providers/auth_provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int initialIndex;
+  
+  const HomeScreen({super.key, this.initialIndex = 0});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-  // --- (AKHIR PERUBAHAN) ---
+  late int _selectedIndex;
 
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex;
   }
 
   void _onItemTapped(int index) {

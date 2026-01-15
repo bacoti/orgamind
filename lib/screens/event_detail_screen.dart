@@ -14,7 +14,7 @@ import '../services/auth_service.dart';
 import '../models/event_model.dart';
 import 'invite_participants_screen.dart';
 import 'participant_list_screen.dart';
-import 'participant_scan_screen.dart';
+import 'home_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final EventModel event;
@@ -687,14 +687,12 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   height: 52,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(
-                        context,
+                      // Navigasi ke HomeScreen dengan tab Pemindai (index 1)
+                      Navigator.of(context).pushAndRemoveUntil(
                         MaterialPageRoute(
-                          builder: (_) => ParticipantScanScreen(
-                            eventId: widget.event.id,
-                            eventTitle: widget.event.title,
-                          ),
+                          builder: (_) => const HomeScreen(initialIndex: 1),
                         ),
+                        (route) => false, // Hapus semua route sebelumnya
                       );
                     },
                     style: ElevatedButton.styleFrom(

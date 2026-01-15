@@ -26,12 +26,47 @@ class ParticipantScanScreen extends StatefulWidget {
 class _ParticipantScanScreenState extends State<ParticipantScanScreen> {
   bool _isBusy = false;
   bool _isSuccess = false;
+  bool _isCameraReady = false;
   String? _message;
-  final MobileScannerController _scannerController = MobileScannerController();
+  String? _cameraError;
+  MobileScannerController? _scannerController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      _scannerController = MobileScannerController(
+        detectionSpeed: DetectionSpeed.normal,
+        facing: CameraFacing.back,
+        torchEnabled: false,
+      );
+
+      // Start the scanner
+      await _scannerController!.start();
+
+      if (mounted) {
+        setState(() {
+          _isCameraReady = true;
+          _cameraError = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _cameraError = 'Gagal mengakses kamera: $e';
+          _isCameraReady = false;
+        });
+      }
+    }
+  }
 
   @override
   void dispose() {
-    _scannerController.dispose();
+    _scannerController?.dispose();
     super.dispose();
   }
 
@@ -107,38 +142,142 @@ class _ParticipantScanScreenState extends State<ParticipantScanScreen> {
           style: const TextStyle(fontSize: 16),
         ),
         centerTitle: true,
+        actions: [
+          // Tombol untuk switch kamera (jika ada multiple camera)
+          if (_isCameraReady && _scannerController != null)
+            IconButton(
+              icon: const Icon(Icons.cameraswitch),
+              onPressed: () => _scannerController!.switchCamera(),
+            ),
+        ],
       ),
-      body: Stack(
-        children: [
-          // Scanner
-          MobileScanner(
-            controller: _scannerController,
-            onDetect: (capture) {
-              final barcodes = capture.barcodes;
-              if (barcodes.isEmpty) return;
-              final rawValue = barcodes.first.rawValue;
-              if (rawValue != null) {
-                _handleQrDetected(rawValue);
-              }
-            },
-          ),
+      body: _buildBody(),
+    );
+  }
 
-          // Overlay dengan scan area indicator
-          Center(
-            child: Container(
-              width: 280,
-              height: 280,
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: _isSuccess ? Colors.green : AppColors.primary,
-                  width: 3,
-                ),
-                borderRadius: BorderRadius.circular(20),
+  Widget _buildBody() {
+    // Jika ada error kamera
+    if (_cameraError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.videocam_off,
+                size: 80,
+                color: Colors.white.withValues(alpha: 0.5),
               ),
+              const SizedBox(height: 24),
+              Text(
+                _cameraError!,
+                style: const TextStyle(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _initializeCamera,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Coba Lagi'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Pastikan browser memiliki izin akses kamera',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Jika kamera belum siap
+    if (!_isCameraReady || _scannerController == null) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: Colors.white),
+            SizedBox(height: 16),
+            Text(
+              'Mempersiapkan kamera...',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Kamera siap - tampilkan scanner
+    return Stack(
+      children: [
+        // Scanner
+        MobileScanner(
+          controller: _scannerController!,
+          onDetect: (capture) {
+            final barcodes = capture.barcodes;
+            if (barcodes.isEmpty) return;
+            final rawValue = barcodes.first.rawValue;
+            if (rawValue != null) {
+              _handleQrDetected(rawValue);
+            }
+          },
+          errorBuilder: (context, error, child) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error: ${error.errorCode.name}',
+                      style: const TextStyle(color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      error.errorDetails?.message ?? 'Unknown error',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+
+        // Overlay dengan scan area indicator
+        Center(
+          child: Container(
+            width: 280,
+            height: 280,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: _isSuccess ? Colors.green : AppColors.primary,
+                width: 3,
+              ),
+              borderRadius: BorderRadius.circular(20),
             ),
           ),
+        ),
 
-          // Status overlay
+        // Status overlay
           Positioned(
             bottom: 0,
             left: 0,
@@ -231,7 +370,6 @@ class _ParticipantScanScreenState extends State<ParticipantScanScreen> {
             ),
           ),
         ],
-      ),
-    );
+      );
   }
 }
