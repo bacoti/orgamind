@@ -18,16 +18,17 @@ class InviteParticipantsScreen extends StatefulWidget {
   });
 
   @override
-  State<InviteParticipantsScreen> createState() => _InviteParticipantsScreenState();
+  State<InviteParticipantsScreen> createState() =>
+      _InviteParticipantsScreenState();
 }
 
 class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
   // Menyimpan ID yang BARU dipilih untuk diundang
   final Set<String> _selectedUserIds = {};
-  
+
   // Menyimpan ID user yang SUDAH diundang sebelumnya (dari database)
   Set<String> _alreadyInvitedIds = {};
-  
+
   bool _isInit = true;
   bool _isLoadingData = false;
 
@@ -44,22 +45,33 @@ class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
     setState(() => _isLoadingData = true);
 
     try {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final eventProvider = Provider.of<EventProvider>(context, listen: false);
+
       final authService = AuthService();
       await authService.init();
       final token = authService.getToken();
 
+      if (!mounted) return;
+
       // 1. Load semua user dengan role 'participant'
-      await Provider.of<UserProvider>(context, listen: false).getAllUsers(role: 'participant');
+      await userProvider.getAllUsers(role: 'participant');
+
+      if (!mounted) return;
 
       // 2. Load peserta yang sudah ada di event ini (untuk difilter)
       if (token != null) {
         // Parse eventId ke int karena provider butuh int
         final int eventIdInt = int.tryParse(widget.eventId) ?? 0;
-        
+
         if (eventIdInt != 0) {
-          final existingParticipants = await Provider.of<EventProvider>(context, listen: false)
-              .getEventParticipants(eventIdInt, token);
-          
+          final existingParticipants = await eventProvider.getEventParticipants(
+            eventIdInt,
+            token,
+          );
+
+          if (!mounted) return;
+
           // Masukkan ID mereka ke set _alreadyInvitedIds
           // Pastikan dikonversi ke String agar cocok dengan user.id
           setState(() {
@@ -87,8 +99,10 @@ class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
     }
 
     final authService = AuthService();
-    await authService.init(); 
+    await authService.init();
     final token = authService.getToken();
+
+    if (!mounted) return;
 
     if (token != null) {
       // KONVERSI ID STRING KE INT UNTUK DIKIRIM KE API
@@ -97,19 +111,32 @@ class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
           .where((id) => id != 0)
           .toList();
 
-      final success = await Provider.of<EventProvider>(context, listen: false)
-          .inviteParticipants(widget.eventId, userIdsInt, token);
+      final success = await Provider.of<EventProvider>(
+        context,
+        listen: false,
+      ).inviteParticipants(widget.eventId, userIdsInt, token);
+
+      if (!mounted) return;
 
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Peserta berhasil diundang!'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Peserta berhasil diundang!'),
+              backgroundColor: Colors.green,
+            ),
           );
           Navigator.pop(context, true); // Kembali dan refresh
         } else {
-          final errorMessage = Provider.of<EventProvider>(context, listen: false).errorMessage;
+          final errorMessage = Provider.of<EventProvider>(
+            context,
+            listen: false,
+          ).errorMessage;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(errorMessage ?? 'Gagal mengundang peserta'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(errorMessage ?? 'Gagal mengundang peserta'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -156,20 +183,22 @@ class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
                         itemCount: users.length,
                         itemBuilder: (context, index) {
                           final user = users[index];
-                          
+
                           // Cek apakah user ini sudah pernah diundang
-                          final isAlreadyInvited = _alreadyInvitedIds.contains(user.id);
-                          
+                          final isAlreadyInvited = _alreadyInvitedIds.contains(
+                            user.id,
+                          );
+
                           // Cek apakah user ini sedang dipilih (dicentang)
                           final isSelected = _selectedUserIds.contains(user.id);
 
                           return CheckboxListTile(
                             // Jika sudah diundang, checkbox otomatis true tapi disabled
                             value: isAlreadyInvited ? true : isSelected,
-                            
+
                             // Jika sudah diundang, matikan interaksi (onChanged: null)
-                            onChanged: isAlreadyInvited 
-                                ? null 
+                            onChanged: isAlreadyInvited
+                                ? null
                                 : (bool? value) {
                                     setState(() {
                                       if (value == true) {
@@ -179,36 +208,44 @@ class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
                                       }
                                     });
                                   },
-                            activeColor: isAlreadyInvited ? Colors.grey : AppColors.primary,
+                            activeColor: isAlreadyInvited
+                                ? Colors.grey
+                                : AppColors.primary,
                             title: Row(
                               children: [
                                 Text(
-                                  user.name, 
+                                  user.name,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: isAlreadyInvited ? Colors.grey : Colors.black,
+                                    color: isAlreadyInvited
+                                        ? Colors.grey
+                                        : Colors.black,
                                   ),
                                 ),
                                 if (isAlreadyInvited)
                                   const Text(
                                     ' (Sudah diundang)',
                                     style: TextStyle(
-                                      color: Colors.green, 
-                                      fontSize: 12, 
-                                      fontStyle: FontStyle.italic
+                                      color: Colors.green,
+                                      fontSize: 12,
+                                      fontStyle: FontStyle.italic,
                                     ),
                                   ),
                               ],
                             ),
                             subtitle: Text(user.email),
                             secondary: CircleAvatar(
-                              backgroundColor: isAlreadyInvited 
-                                  ? Colors.grey.withOpacity(0.2) 
-                                  : AppColors.primary.withOpacity(0.1),
+                              backgroundColor: isAlreadyInvited
+                                  ? Colors.grey.withValues(alpha: 0.2)
+                                  : AppColors.primary.withValues(alpha: 0.1),
                               child: Text(
-                                user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
+                                user.name.isNotEmpty
+                                    ? user.name[0].toUpperCase()
+                                    : '?',
                                 style: TextStyle(
-                                  color: isAlreadyInvited ? Colors.grey : AppColors.primary
+                                  color: isAlreadyInvited
+                                      ? Colors.grey
+                                      : AppColors.primary,
                                 ),
                               ),
                             ),
@@ -224,7 +261,13 @@ class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: const Offset(0, -2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: ElevatedButton(
           onPressed: _selectedUserIds.isNotEmpty ? _submitInvite : null,
@@ -232,11 +275,16 @@ class _InviteParticipantsScreenState extends State<InviteParticipantsScreen> {
             backgroundColor: AppColors.primary,
             disabledBackgroundColor: Colors.grey[300],
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           child: Text(
             'Undang (${_selectedUserIds.length}) Peserta',
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

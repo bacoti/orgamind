@@ -141,7 +141,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   child: CircleAvatar(
                     backgroundColor: _isScrolled
                         ? Colors.white
-                        : Colors.black.withOpacity(0.3),
+                        : Colors.black.withValues(alpha: 0.3),
                     child: IconButton(
                       icon: Icon(
                         Icons.arrow_back_rounded,
@@ -167,7 +167,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   end: Alignment.bottomLeft,
                                   colors: [
                                     AppColors.primary,
-                                    AppColors.primary.withOpacity(0.7),
+                                    AppColors.primary.withValues(alpha: 0.7),
                                   ],
                                 ),
                               ),
@@ -178,8 +178,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     right: -50,
                                     child: CircleAvatar(
                                       radius: 100,
-                                      backgroundColor:
-                                          Colors.white.withOpacity(0.1),
+                                      backgroundColor: Colors.white.withValues(
+                                        alpha: 0.1,
+                                      ),
                                     ),
                                   ),
                                   Positioned(
@@ -187,8 +188,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                     left: -30,
                                     child: CircleAvatar(
                                       radius: 80,
-                                      backgroundColor:
-                                          Colors.white.withOpacity(0.1),
+                                      backgroundColor: Colors.white.withValues(
+                                        alpha: 0.1,
+                                      ),
                                     ),
                                   ),
                                   const Center(
@@ -208,8 +210,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                             end: Alignment.bottomCenter,
                             colors: [
                               Colors.transparent,
-                              Colors.black.withOpacity(0.1),
-                              Colors.black.withOpacity(0.8),
+                              Colors.black.withValues(alpha: 0.1),
+                              Colors.black.withValues(alpha: 0.8),
                             ],
                             stops: const [0.4, 0.7, 1.0],
                           ),
@@ -308,8 +310,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               child: _buildInfoBox(
                                 icon: Icons.calendar_today_rounded,
                                 title: 'Tanggal',
-                                value: DateFormat('dd MMM yyyy', 'id_ID')
-                                    .format(widget.event.date),
+                                value: DateFormat(
+                                  'dd MMM yyyy',
+                                  'id_ID',
+                                ).format(widget.event.date),
                                 color: Colors.blue,
                               ),
                             ),
@@ -341,13 +345,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border: Border.all(
-                                  color: AppColors.primary.withOpacity(0.2),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.2,
+                                  ),
                                 ),
                               ),
                               child: CircleAvatar(
                                 radius: 24,
-                                backgroundColor:
-                                    AppColors.primary.withOpacity(0.1),
+                                backgroundColor: AppColors.primary.withValues(
+                                  alpha: 0.1,
+                                ),
                                 child: Text(
                                   (widget.event.organizerName ?? 'A')[0]
                                       .toUpperCase(),
@@ -388,8 +395,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: _getStatusColor(_currentStatus)
-                                      .withOpacity(0.1),
+                                  color: _getStatusColor(
+                                    _currentStatus,
+                                  ).withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
@@ -450,9 +458,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   MaterialPageRoute(
                                     builder: (context) =>
                                         InviteParticipantsScreen(
-                                      eventId: widget.event.id.toString(),
-                                      eventTitle: widget.event.title,
-                                    ),
+                                          eventId: widget.event.id.toString(),
+                                          eventTitle: widget.event.title,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -478,7 +486,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 20,
                       offset: const Offset(0, -5),
                     ),
@@ -534,7 +542,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                shadowColor: AppColors.primary.withOpacity(0.4),
+                                shadowColor: AppColors.primary.withValues(
+                                  alpha: 0.4,
+                                ),
                                 elevation: 8,
                               ),
                               child: const Text(
@@ -563,7 +573,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 20,
                       offset: const Offset(0, -5),
                     ),
@@ -591,7 +601,7 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                       elevation: 8,
-                      shadowColor: AppColors.primary.withOpacity(0.4),
+                      shadowColor: AppColors.primary.withValues(alpha: 0.4),
                     ),
                     icon: const Icon(Icons.qr_code_2, color: Colors.white),
                     label: const Text(
@@ -620,9 +630,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
+        color: color.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.1)),
+        border: Border.all(color: color.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -672,9 +682,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: color.withOpacity(0.2)),
+            border: Border.all(color: color.withValues(alpha: 0.2)),
             borderRadius: BorderRadius.circular(16),
-            color: color.withOpacity(0.05),
+            color: color.withValues(alpha: 0.05),
           ),
           child: Row(
             children: [
@@ -696,7 +706,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                 ),
               ),
               const Spacer(),
-              Icon(Icons.chevron_right_rounded, color: color.withOpacity(0.5)),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: color.withValues(alpha: 0.5),
+              ),
             ],
           ),
         ),

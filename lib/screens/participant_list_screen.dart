@@ -36,6 +36,8 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
       await authService.init();
       final token = authService.getToken();
 
+      if (!mounted) return;
+
       if (token != null) {
         final data = await Provider.of<EventProvider>(
           context,
@@ -78,6 +80,8 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
     final token = authService.getToken();
     if (token == null) return;
 
+    if (!mounted) return;
+
     final success = await Provider.of<EventProvider>(
       context,
       listen: false,
@@ -96,6 +100,8 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
     await authService.init();
     final token = authService.getToken();
     if (token == null) return;
+
+    if (!mounted) return;
 
     final success = await Provider.of<EventProvider>(
       context,
@@ -157,7 +163,9 @@ class _ParticipantListScreenState extends State<ParticipantListScreen> {
 
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: _getStatusColor(status).withOpacity(0.1),
+                    backgroundColor: _getStatusColor(
+                      status,
+                    ).withValues(alpha: 0.1),
                     child: Text(
                       p['name'] != null && p['name'].toString().isNotEmpty
                           ? p['name'][0].toUpperCase()

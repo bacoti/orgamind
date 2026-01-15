@@ -195,8 +195,8 @@ class _EventListScreenState extends State<EventListScreen>
                                         radius: 20,
                                         backgroundColor: isRead
                                             ? Colors.grey[100]
-                                            : AppColors.primary.withOpacity(
-                                                0.1,
+                                            : AppColors.primary.withValues(
+                                                alpha: 0.1,
                                               ),
                                         child: Icon(
                                           Icons.mail,
@@ -321,7 +321,7 @@ class _EventListScreenState extends State<EventListScreen>
                         right: -50,
                         child: CircleAvatar(
                           radius: 100,
-                          backgroundColor: Colors.white.withOpacity(0.1),
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
                       Positioned(
@@ -329,7 +329,7 @@ class _EventListScreenState extends State<EventListScreen>
                         left: -30,
                         child: CircleAvatar(
                           radius: 80,
-                          backgroundColor: Colors.white.withOpacity(0.1),
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
 
@@ -359,7 +359,9 @@ class _EventListScreenState extends State<EventListScreen>
                                   Text(
                                     _getGreeting(),
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.9),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
                                       fontSize: 14,
                                     ),
                                   ),
@@ -669,7 +671,9 @@ class _EventListScreenState extends State<EventListScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white.withOpacity(0.2),
+          color: isSelected
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
@@ -786,7 +790,7 @@ class _EventListScreenState extends State<EventListScreen>
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: Offset(0, 4),
             ),
@@ -797,7 +801,7 @@ class _EventListScreenState extends State<EventListScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(

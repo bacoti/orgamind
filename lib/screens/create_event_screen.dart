@@ -23,6 +23,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   DateTime? _selectedDate;
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 12, minute: 0);
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _locationController.dispose();
+    _descriptionController.dispose();
+    _categoryController.dispose();
+    _capacityController.dispose();
+    super.dispose();
+  }
 
   void _pilihTanggal() {
     showDatePicker(
@@ -32,6 +43,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       lastDate: DateTime(2030),
     ).then((pickedDate) {
       if (pickedDate == null) return;
+      if (!mounted) return;
       setState(() {
         _selectedDate = pickedDate;
       });
@@ -44,6 +56,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       initialTime: isStartTime ? _startTime : _endTime,
     );
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         if (isStartTime) {
           _startTime = picked;
@@ -55,12 +68,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   }
 
   Future<void> _submitData() async {
-    final enteredTitle = _titleController.text;
-    final enteredLocation = _locationController.text;
-    final enteredDescription = _descriptionController.text;
-    final enteredCategory = _categoryController.text;
+    if (_isSubmitting) return;
+
+    final enteredTitle = _titleController.text.trim();
+    final enteredLocation = _locationController.text.trim();
+    final enteredDescription = _descriptionController.text.trim();
+    final enteredCategory = _categoryController.text.trim();
     // MENGAMBIL NILAI DARI CONTROLLER KAPASITAS
-    final capacity = int.tryParse(_capacityController.text) ?? 100;
+    final parsedCapacity = int.tryParse(_capacityController.text.trim());
+    final capacity = (parsedCapacity == null || parsedCapacity <= 0)
+        ? 100
+        : parsedCapacity;
 
     if (enteredTitle.isEmpty ||
         enteredLocation.isEmpty ||
@@ -136,6 +154,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
 
     try {
+      setState(() => _isSubmitting = true);
+
       final eventProvider = Provider.of<EventProvider>(context, listen: false);
       final authService = AuthService();
       await authService.init();
@@ -176,6 +196,10 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
       }
     }
   }
@@ -329,7 +353,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitData,
+                  onPressed: _isSubmitting ? null : _submitData,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -338,10 +362,22 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Simpan Acara',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Simpan Acara',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
             ],

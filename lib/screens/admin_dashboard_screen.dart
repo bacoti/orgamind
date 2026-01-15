@@ -158,12 +158,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     shape: BoxShape.circle,
                                     color: Colors.white,
                                     border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.5),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       width: 2,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.1),
+                                        color: Colors.black.withValues(
+                                          alpha: 0.1,
+                                        ),
                                         blurRadius: 8,
                                         offset: const Offset(0, 2),
                                       ),
@@ -192,7 +196,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     _getGreeting(),
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.white.withValues(alpha: 0.9),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -1007,7 +1013,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       AppColors.primary,
                                       AppColors.primary.withValues(alpha: 0.7),
                                     ]
-                                  : [Colors.grey, Colors.grey.withValues(alpha: 0.7)],
+                                  : [
+                                      Colors.grey,
+                                      Colors.grey.withValues(alpha: 0.7),
+                                    ],
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1045,7 +1054,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withValues(alpha: 0.1),
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.1,
+                                    ),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -1192,7 +1203,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     gradient: LinearGradient(
                                       colors: [
                                         AppColors.primary,
-                                        AppColors.primary.withValues(alpha: 0.7),
+                                        AppColors.primary.withValues(
+                                          alpha: 0.7,
+                                        ),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(3),
@@ -1283,8 +1296,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 text,
                 style: TextStyle(fontSize: 12, color: Colors.grey[700]),
               ),
-      ],
-    );
+            ],
+          );
   }
 
   Widget _buildEventActionButton(
@@ -1309,77 +1322,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           child: Icon(icon, color: color, size: 18),
         ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(40),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.event_busy,
-              size: 60,
-              color: AppColors.primary.withOpacity(0.5),
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Belum Ada Event',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Mulai dengan membuat event pertama Anda\nuntuk mengelola kegiatan organisasi',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _handleCreateEvent,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            icon: const Icon(Icons.add),
-            label: const Text(
-              'Buat Event Pertama',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
       ),
     );
   }

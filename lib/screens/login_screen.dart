@@ -5,9 +5,7 @@ import '../constants/strings.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/common_widgets.dart';
 import 'register_screen.dart';
-import 'home_screen.dart';
 import 'forgot_password_screen.dart';
-import 'admin_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -84,17 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
         LoadingDialog.hide(context);
 
         if (success) {
-          // Navigate based on user role
-          if (authProvider.isAdmin) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const AdminDashboardScreen()),
-            );
-          } else {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          }
-          // Show success message
+          // IMPORTANT:
+          // We do not navigate manually here because the app already uses `_HomeRouter`
+          // (see `lib/main.dart`) to switch between Login/Home/Admin based on auth state.
+          // Manual navigation + router rebuild can cause blank/white screens.
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text(AppStrings.loginSuccess)),
           );

@@ -31,17 +31,21 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final authService = AuthService();
     await authService.init();
     final token = authService.getToken();
-    
+
     if (token != null && mounted) {
       // Ambil data undangan terbaru
-      await Provider.of<EventProvider>(context, listen: false).getUserInvitations(token);
+      await Provider.of<EventProvider>(
+        context,
+        listen: false,
+      ).getUserInvitations(token);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Background putih bersih seperti halaman pesan
+      backgroundColor:
+          Colors.white, // Background putih bersih seperti halaman pesan
       appBar: AppBar(
         title: const Text(
           'Notifikasi',
@@ -67,9 +71,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_off_outlined, size: 60, color: Colors.grey[300]),
+                  Icon(
+                    Icons.notifications_off_outlined,
+                    size: 60,
+                    color: Colors.grey[300],
+                  ),
                   const SizedBox(height: 16),
-                  Text('Tidak ada notifikasi baru', style: TextStyle(color: Colors.grey[600])),
+                  Text(
+                    'Tidak ada notifikasi baru',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                 ],
               ),
             );
@@ -79,18 +90,22 @@ class _NotificationScreenState extends State<NotificationScreen> {
             onRefresh: _loadInvitations,
             child: ListView.separated(
               itemCount: invitations.length,
-              separatorBuilder: (ctx, i) => const Divider(height: 1, indent: 70),
+              separatorBuilder: (ctx, i) =>
+                  const Divider(height: 1, indent: 70),
               itemBuilder: (context, index) {
                 final event = invitations[index];
-                
+
                 // Set status agar detail screen tahu ini undangan
                 event.status = 'invited';
 
                 return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   leading: CircleAvatar(
                     radius: 24,
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     child: Icon(Icons.mail_outline, color: AppColors.primary),
                   ),
                   title: RichText(
@@ -108,7 +123,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 6.0),
                     child: Text(
-                      DateFormat('dd MMM yyyy • HH:mm', 'id_ID').format(event.date),
+                      DateFormat(
+                        'dd MMM yyyy • HH:mm',
+                        'id_ID',
+                      ).format(event.date),
                       style: TextStyle(color: Colors.grey[500], fontSize: 12),
                     ),
                   ),
