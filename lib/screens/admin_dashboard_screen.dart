@@ -360,15 +360,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
         final events = eventProvider.events;
+        final now = DateTime.now();
         final upcomingEvents = events
-            .where((e) => e.date.isAfter(DateTime.now()))
+            .where((e) => e.effectiveEndDateTime.isAfter(now))
             .length;
         final todayEvents = events
             .where(
               (e) =>
-                  e.date.year == DateTime.now().year &&
-                  e.date.month == DateTime.now().month &&
-                  e.date.day == DateTime.now().day,
+                  e.date.year == now.year &&
+                  e.date.month == now.month &&
+                  e.date.day == now.day,
             )
             .length;
 
@@ -457,11 +458,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
         final events = eventProvider.events;
+        final now = DateTime.now();
         final upcomingEvents = events
-            .where((e) => e.date.isAfter(DateTime.now()))
+            .where((e) => e.effectiveEndDateTime.isAfter(now))
             .toList();
         final pastEvents = events
-            .where((e) => e.date.isBefore(DateTime.now()))
+            .where((e) => !e.effectiveEndDateTime.isAfter(now))
             .toList();
         final totalParticipants = events.fold(
           0,
@@ -517,7 +519,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Semua'),
                         ),
                       ),
                     ),
@@ -533,7 +536,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Mendatang'),
                         ),
                       ),
                     ),
@@ -553,7 +557,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Selesai'),
                         ),
                       ),
                     ),
@@ -950,8 +955,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildEnhancedEventCard(EventModel event, int index) {
-    final isUpcoming = event.date.isAfter(DateTime.now());
-    final daysUntil = event.date.difference(DateTime.now()).inDays;
+    final now = DateTime.now();
+    final isUpcoming = event.effectiveEndDateTime.isAfter(now);
+    final daysUntil = event.startDateTime.isAfter(now)
+        ? event.startDateTime.difference(now).inDays
+        : 0;
     final participantPercentage = event.capacity > 0
         ? ((event.participantsCount ?? 0) / event.capacity * 100).clamp(0, 100)
         : 0.0;

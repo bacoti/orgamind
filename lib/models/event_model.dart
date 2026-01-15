@@ -67,4 +67,40 @@ class EventModel {
 
   String get speakerName => organizerName ?? 'Panitia';
   String get speakerRole => 'Organizer';
+
+  DateTime get startDateTime {
+    final start = _parseTimeOfDay(time);
+    return DateTime(date.year, date.month, date.day, start.$1, start.$2, 0);
+  }
+
+  DateTime? get endDateTime {
+    if (endTime == null || endTime!.trim().isEmpty) return null;
+    final start = _parseTimeOfDay(time);
+    final end = _parseTimeOfDay(endTime!);
+    var endDt = DateTime(date.year, date.month, date.day, end.$1, end.$2, 0);
+    final startDt = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      start.$1,
+      start.$2,
+      0,
+    );
+    if (!endDt.isAfter(startDt)) {
+      endDt = endDt.add(const Duration(days: 1));
+    }
+    return endDt;
+  }
+
+  DateTime get effectiveEndDateTime => endDateTime ?? startDateTime;
+
+  static (int, int) _parseTimeOfDay(String raw) {
+    final value = raw.trim();
+    final parts = value.split(':');
+    if (parts.length < 2) return (0, 0);
+
+    final hour = int.tryParse(parts[0]) ?? 0;
+    final minute = int.tryParse(parts[1]) ?? 0;
+    return (hour.clamp(0, 23), minute.clamp(0, 59));
+  }
 }

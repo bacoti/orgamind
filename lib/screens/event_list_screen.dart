@@ -11,26 +11,37 @@ import '../models/event_model.dart';
 import 'event_detail_screen.dart';
 
 class EventListScreen extends StatefulWidget {
-  const EventListScreen({super.key});
+  const EventListScreen({super.key, this.initialFilter});
+
+  final String? initialFilter;
 
   @override
   State<EventListScreen> createState() => _EventListScreenState();
 }
 
-class _EventListScreenState extends State<EventListScreen> with SingleTickerProviderStateMixin {
+class _EventListScreenState extends State<EventListScreen>
+    with SingleTickerProviderStateMixin {
   bool _isInit = true;
   final Set<int> _readNotificationIds = {};
-  
+
   String _searchQuery = '';
   String _selectedFilter = 'Semua';
   late TextEditingController _searchController;
   late ScrollController _scrollController;
+
+  bool get _isAdmin =>
+      Provider.of<AuthProvider>(context, listen: false).isAdmin;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
     _scrollController = ScrollController();
+
+    final initial = widget.initialFilter;
+    if (initial != null && initial.isNotEmpty) {
+      _selectedFilter = initial;
+    }
   }
 
   @override
@@ -58,7 +69,11 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
       final token = authService.getToken();
       if (mounted && token != null) {
         final provider = Provider.of<EventProvider>(context, listen: false);
-        await provider.getUserInvitations(token);
+        if (_isAdmin) {
+          await provider.getAllEvents(token: token);
+        } else {
+          await provider.getUserInvitations(token);
+        }
       }
     } catch (e) {
       debugPrint("Error loading events: $e");
@@ -86,7 +101,7 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                     child: Container(
                       width: 320,
                       constraints: BoxConstraints(
-                        maxHeight: MediaQuery.of(context).size.height * 0.6
+                        maxHeight: MediaQuery.of(context).size.height * 0.6,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -103,17 +118,24 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                               children: [
                                 const Text(
                                   'Notifikasi',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                                 InkWell(
                                   onTap: () => Navigator.pop(context),
-                                  child: const Icon(Icons.close, size: 20, color: Colors.grey),
-                                )
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           const Divider(height: 1),
-                          
+
                           // List Notifikasi
                           Flexible(
                             child: Consumer<EventProvider>(
@@ -122,7 +144,9 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                                 final pendingInvitations = invitations
                                     .where((e) => e.status == 'invited')
                                     .toList();
-                                pendingInvitations.sort((a, b) => b.date.compareTo(a.date));
+                                pendingInvitations.sort(
+                                  (a, b) => b.date.compareTo(a.date),
+                                );
 
                                 if (pendingInvitations.isEmpty) {
                                   return Padding(
@@ -130,9 +154,19 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                                     child: Center(
                                       child: Column(
                                         children: [
-                                          Icon(Icons.notifications_none, size: 40, color: Colors.grey[300]),
+                                          Icon(
+                                            Icons.notifications_none,
+                                            size: 40,
+                                            color: Colors.grey[300],
+                                          ),
                                           const SizedBox(height: 8),
-                                          Text('Tidak ada undangan baru', style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                                          Text(
+                                            'Tidak ada undangan baru',
+                                            style: TextStyle(
+                                              color: Colors.grey[500],
+                                              fontSize: 13,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -143,42 +177,83 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                                   shrinkWrap: true,
                                   padding: EdgeInsets.zero,
                                   itemCount: pendingInvitations.length,
-                                  separatorBuilder: (ctx, i) => const Divider(height: 1),
+                                  separatorBuilder: (ctx, i) =>
+                                      const Divider(height: 1),
                                   itemBuilder: (context, index) {
                                     final event = pendingInvitations[index];
-                                    final bool isRead = _readNotificationIds.contains(event.id);
+                                    final bool isRead = _readNotificationIds
+                                        .contains(event.id);
 
                                     return ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
                                       dense: true,
                                       leading: CircleAvatar(
                                         radius: 20,
-                                        backgroundColor: isRead ? Colors.grey[100] : AppColors.primary.withOpacity(0.1),
-                                        child: Icon(Icons.mail, color: isRead ? Colors.grey : AppColors.primary, size: 20),
+                                        backgroundColor: isRead
+                                            ? Colors.grey[100]
+                                            : AppColors.primary.withOpacity(
+                                                0.1,
+                                              ),
+                                        child: Icon(
+                                          Icons.mail,
+                                          color: isRead
+                                              ? Colors.grey
+                                              : AppColors.primary,
+                                          size: 20,
+                                        ),
                                       ),
                                       title: Text(
                                         event.title,
                                         style: TextStyle(
-                                          fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                                          fontWeight: isRead
+                                              ? FontWeight.normal
+                                              : FontWeight.bold,
                                           fontSize: 13,
-                                          color: isRead ? Colors.grey[700] : Colors.black87,
+                                          color: isRead
+                                              ? Colors.grey[700]
+                                              : Colors.black87,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       subtitle: Text(
                                         'Undangan • ${DateFormat('dd MMM').format(event.date)}',
-                                        style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 11,
+                                        ),
                                       ),
-                                      trailing: !isRead 
-                                        ? Container(width: 8, height: 8, decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle))
-                                        : null,
+                                      trailing: !isRead
+                                          ? Container(
+                                              width: 8,
+                                              height: 8,
+                                              decoration: const BoxDecoration(
+                                                color: Colors.red,
+                                                shape: BoxShape.circle,
+                                              ),
+                                            )
+                                          : null,
                                       onTap: () {
-                                        setStatePopup(() => _readNotificationIds.add(event.id));
-                                        this.setState(() {}); 
+                                        setStatePopup(
+                                          () => _readNotificationIds.add(
+                                            event.id,
+                                          ),
+                                        );
+                                        this.setState(() {});
                                         Navigator.pop(context);
-                                        Navigator.push(context, MaterialPageRoute(builder: (context) => EventDetailScreen(event: event)))
-                                            .then((v) { if (v == true) _refreshEvents(); });
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                EventDetailScreen(event: event),
+                                          ),
+                                        ).then((v) {
+                                          if (v == true) _refreshEvents();
+                                        });
                                       },
                                     );
                                   },
@@ -193,9 +268,9 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                 ),
               ],
             );
-          }
+          },
         );
-      }
+      },
     );
   }
 
@@ -241,9 +316,23 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                   child: Stack(
                     children: [
                       // Dekorasi lingkaran
-                      Positioned(top: -50, right: -50, child: CircleAvatar(radius: 100, backgroundColor: Colors.white.withOpacity(0.1))),
-                      Positioned(bottom: -30, left: -30, child: CircleAvatar(radius: 80, backgroundColor: Colors.white.withOpacity(0.1))),
-                      
+                      Positioned(
+                        top: -50,
+                        right: -50,
+                        child: CircleAvatar(
+                          radius: 100,
+                          backgroundColor: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: -30,
+                        left: -30,
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundColor: Colors.white.withOpacity(0.1),
+                        ),
+                      ),
+
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 60, 24, 0),
                         child: Row(
@@ -252,7 +341,14 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                             CircleAvatar(
                               radius: 26,
                               backgroundColor: Colors.white,
-                              child: Text(userInitial, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                              child: Text(
+                                userInitial,
+                                style: const TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                              ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -260,8 +356,21 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(_getGreeting(), style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14)),
-                                  Text(userName, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                                  Text(
+                                    _getGreeting(),
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.9),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    userName,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -273,42 +382,65 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                 ),
               ),
               actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Consumer<EventProvider>(
-                    builder: (context, eventProvider, child) {
-                      final invitations = eventProvider.invitations;
-                      final pendingInvitations = invitations.where((e) => e.status == 'invited').toList();
-                      final int unreadCount = pendingInvitations.where((e) => !_readNotificationIds.contains(e.id)).length;
+                if (!_isAdmin)
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16.0),
+                    child: Consumer<EventProvider>(
+                      builder: (context, eventProvider, child) {
+                        final invitations = eventProvider.invitations;
+                        final pendingInvitations = invitations
+                            .where((e) => e.status == 'invited')
+                            .toList();
+                        final int unreadCount = pendingInvitations
+                            .where((e) => !_readNotificationIds.contains(e.id))
+                            .length;
 
-                      return Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
-                            onPressed: () => _showNotificationPopup(context),
-                          ),
-                          if (unreadCount > 0)
-                            Positioned(
-                              right: 8, top: 8,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: Colors.white, width: 1.5),
-                                ),
-                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                                child: Center(
-                                  child: Text('$unreadCount', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        return Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.notifications_outlined,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                              onPressed: () => _showNotificationPopup(context),
+                            ),
+                            if (unreadCount > 0)
+                              Positioned(
+                                right: 8,
+                                top: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 16,
+                                    minHeight: 16,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '$unreadCount',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                        ],
-                      );
-                    },
+                          ],
+                        );
+                      },
+                    ),
                   ),
-                ),
               ],
             ),
 
@@ -317,7 +449,8 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
               pinned: true,
               delegate: _StickyHeaderDelegate(
                 child: Container(
-                  color: AppColors.primary, // Warna biru agar menyatu dengan header
+                  color: AppColors
+                      .primary, // Warna biru agar menyatu dengan header
                   padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -330,12 +463,16 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                         ),
                         child: TextField(
                           controller: _searchController,
-                          onChanged: (value) => setState(() => _searchQuery = value),
+                          onChanged: (value) =>
+                              setState(() => _searchQuery = value),
                           decoration: const InputDecoration(
                             hintText: 'Cari acara...',
                             prefixIcon: Icon(Icons.search, color: Colors.grey),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
                           ),
                         ),
                       ),
@@ -347,9 +484,15 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                           children: [
                             _buildFilterChip('Semua'),
                             const SizedBox(width: 8),
-                            _buildFilterChip('Undangan'),
-                            const SizedBox(width: 8),
-                            _buildFilterChip('Jadwal'),
+                            if (_isAdmin) ...[
+                              _buildFilterChip('Mendatang'),
+                              const SizedBox(width: 8),
+                              _buildFilterChip('Selesai'),
+                            ] else ...[
+                              _buildFilterChip('Undangan'),
+                              const SizedBox(width: 8),
+                              _buildFilterChip('Jadwal'),
+                            ],
                           ],
                         ),
                       ),
@@ -364,18 +507,80 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
             // --- LIST CONTENT ---
             Consumer<EventProvider>(
               builder: (context, eventProvider, _) {
-                if (eventProvider.isLoading && eventProvider.invitations.isEmpty) {
-                   return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
+                if (_isAdmin) {
+                  if (eventProvider.isLoading && eventProvider.events.isEmpty) {
+                    return const SliverFillRemaining(
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  var allEvents = List<EventModel>.from(eventProvider.events);
+                  if (_searchQuery.isNotEmpty) {
+                    allEvents = allEvents
+                        .where(
+                          (e) => e.title.toLowerCase().contains(
+                            _searchQuery.toLowerCase(),
+                          ),
+                        )
+                        .toList();
+                  }
+
+                  final now = DateTime.now();
+                  if (_selectedFilter == 'Mendatang') {
+                    allEvents = allEvents
+                        .where((e) => e.effectiveEndDateTime.isAfter(now))
+                        .toList();
+                  } else if (_selectedFilter == 'Selesai') {
+                    allEvents = allEvents
+                        .where((e) => !e.effectiveEndDateTime.isAfter(now))
+                        .toList();
+                  }
+
+                  allEvents.sort(
+                    (a, b) => a.startDateTime.compareTo(b.startDateTime),
+                  );
+
+                  if (allEvents.isEmpty) {
+                    return const SliverFillRemaining(
+                      child: Center(child: Text("Belum ada event")),
+                    );
+                  }
+
+                  return SliverList(
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final event = allEvents[index];
+                      return _buildScheduleCard(event);
+                    }, childCount: allEvents.length),
+                  );
                 }
 
-                var allEvents = List<EventModel>.from(eventProvider.invitations);
+                if (eventProvider.isLoading &&
+                    eventProvider.invitations.isEmpty) {
+                  return const SliverFillRemaining(
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                var allEvents = List<EventModel>.from(
+                  eventProvider.invitations,
+                );
                 if (_searchQuery.isNotEmpty) {
-                  allEvents = allEvents.where((e) => e.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+                  allEvents = allEvents
+                      .where(
+                        (e) => e.title.toLowerCase().contains(
+                          _searchQuery.toLowerCase(),
+                        ),
+                      )
+                      .toList();
                 }
                 if (_selectedFilter == 'Undangan') {
-                  allEvents = allEvents.where((e) => e.status == 'invited').toList();
+                  allEvents = allEvents
+                      .where((e) => e.status == 'invited')
+                      .toList();
                 } else if (_selectedFilter == 'Jadwal') {
-                  allEvents = allEvents.where((e) => e.status == 'registered').toList();
+                  allEvents = allEvents
+                      .where((e) => e.status == 'registered')
+                      .toList();
                 }
 
                 allEvents.sort((a, b) {
@@ -385,21 +590,35 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                 });
 
                 if (allEvents.isEmpty) {
-                  return const SliverFillRemaining(child: Center(child: Text("Belum ada event")));
+                  return const SliverFillRemaining(
+                    child: Center(child: Text("Belum ada event")),
+                  );
                 }
 
-                final invitedEvents = allEvents.where((e) => e.status == 'invited').toList();
-                final registeredEvents = allEvents.where((e) => e.status != 'invited').toList();
+                final invitedEvents = allEvents
+                    .where((e) => e.status == 'invited')
+                    .toList();
+                final registeredEvents = allEvents
+                    .where((e) => e.status != 'invited')
+                    .toList();
 
                 return SliverList(
                   delegate: SliverChildListDelegate([
-                    if (invitedEvents.isNotEmpty && (_selectedFilter == 'Semua' || _selectedFilter == 'Undangan')) ...[
+                    if (invitedEvents.isNotEmpty &&
+                        (_selectedFilter == 'Semua' ||
+                            _selectedFilter == 'Undangan')) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Undangan Event', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))
+                            const Text(
+                              'Undangan Event',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -409,16 +628,26 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           scrollDirection: Axis.horizontal,
                           itemCount: invitedEvents.length,
-                          separatorBuilder: (ctx, i) => const SizedBox(width: 16),
-                          itemBuilder: (context, index) => _buildTicketCard(invitedEvents[index]),
+                          separatorBuilder: (ctx, i) =>
+                              const SizedBox(width: 16),
+                          itemBuilder: (context, index) =>
+                              _buildTicketCard(invitedEvents[index]),
                         ),
                       ),
                     ],
 
-                    if (registeredEvents.isNotEmpty && (_selectedFilter == 'Semua' || _selectedFilter == 'Jadwal')) ...[
+                    if (registeredEvents.isNotEmpty &&
+                        (_selectedFilter == 'Semua' ||
+                            _selectedFilter == 'Jadwal')) ...[
                       const Padding(
                         padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
-                        child: Text('Jadwal Mendatang', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        child: Text(
+                          'Jadwal Mendatang',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                       ...registeredEvents.map((e) => _buildScheduleCard(e)),
                     ],
@@ -459,16 +688,28 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
     return GestureDetector(
       onTap: () {
         setState(() => _readNotificationIds.add(event.id));
-        Navigator.push(context, MaterialPageRoute(builder: (context) => EventDetailScreen(event: event)))
-            .then((_) => _refreshEvents());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailScreen(event: event),
+          ),
+        ).then((_) => _refreshEvents());
       },
       child: Container(
         width: 280,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFF1E1E1E), Color(0xFF3A3A3A)]),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1E1E1E), Color(0xFF3A3A3A)],
+          ),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -477,21 +718,48 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.orange, borderRadius: BorderRadius.circular(4)),
-                  child: const Text('BUTUH RESPON', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Text(
+                    'BUTUH RESPON',
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                Text(DateFormat('d MMM yyyy').format(event.date), style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                Text(
+                  DateFormat('d MMM yyyy').format(event.date),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
               ],
             ),
             const Spacer(),
-            Text(event.title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
+            Text(
+              event.title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
                 const Icon(Icons.location_on, color: Colors.white54, size: 14),
                 const SizedBox(width: 4),
-                Expanded(child: Text(event.location, style: const TextStyle(color: Colors.white54, fontSize: 12), maxLines: 1)),
+                Expanded(
+                  child: Text(
+                    event.location,
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                    maxLines: 1,
+                  ),
+                ),
               ],
             ),
           ],
@@ -503,8 +771,12 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
   Widget _buildScheduleCard(EventModel event) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => EventDetailScreen(event: event)))
-            .then((_) => _refreshEvents());
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailScreen(event: event),
+          ),
+        ).then((_) => _refreshEvents());
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -512,7 +784,13 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10, offset: Offset(0, 4))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -524,8 +802,21 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
               ),
               child: Column(
                 children: [
-                  Text(DateFormat('dd').format(event.date), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                  Text(DateFormat('MMM').format(event.date), style: const TextStyle(fontSize: 12, color: AppColors.primary)),
+                  Text(
+                    DateFormat('dd').format(event.date),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  Text(
+                    DateFormat('MMM').format(event.date),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -534,9 +825,20 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(event.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  Text(
+                    event.title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 4),
-                  Text('${event.time} • ${event.location}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                  Text(
+                    '${event.time} • ${event.location}',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                  ),
                 ],
               ),
             ),
@@ -551,9 +853,24 @@ class _EventListScreenState extends State<EventListScreen> with SingleTickerProv
 class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
   final double maxHeight, minHeight;
-  _StickyHeaderDelegate({required this.child, required this.maxHeight, required this.minHeight});
-  @override Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => SizedBox.expand(child: child);
-  @override double get maxExtent => maxHeight;
-  @override double get minExtent => minHeight;
-  @override bool shouldRebuild(_StickyHeaderDelegate oldDelegate) => maxHeight != oldDelegate.maxExtent || minHeight != oldDelegate.minExtent || child != oldDelegate.child;
+  _StickyHeaderDelegate({
+    required this.child,
+    required this.maxHeight,
+    required this.minHeight,
+  });
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) => SizedBox.expand(child: child);
+  @override
+  double get maxExtent => maxHeight;
+  @override
+  double get minExtent => minHeight;
+  @override
+  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) =>
+      maxHeight != oldDelegate.maxExtent ||
+      minHeight != oldDelegate.minExtent ||
+      child != oldDelegate.child;
 }
