@@ -880,6 +880,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ==================== FLOATING ACTION BUTTON ====================
   Widget _buildFAB() {
     return FloatingActionButton.extended(
+      heroTag: 'admin_dashboard_fab',
       onPressed: _handleCreateEvent,
       backgroundColor: AppColors.primary,
       elevation: 4,

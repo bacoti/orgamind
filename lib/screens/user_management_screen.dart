@@ -83,14 +83,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             ),
 
             // Search & Filter Section
-            SliverToBoxAdapter(
-              child: _buildSearchAndFilter(),
-            ),
+            SliverToBoxAdapter(child: _buildSearchAndFilter()),
 
             // User Statistics
-            SliverToBoxAdapter(
-              child: _buildStatistics(),
-            ),
+            SliverToBoxAdapter(child: _buildStatistics()),
 
             // Users List
             _buildUsersList(),
@@ -98,6 +94,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'user_management_fab',
         onPressed: _showAddUserDialog,
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.person_add, color: Colors.white),
@@ -140,11 +137,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             ),
           ),
           const SizedBox(height: 12),
-          
+
           // Filter Chips
           Row(
             children: [
-              const Text('Filter:', style: TextStyle(fontWeight: FontWeight.w500)),
+              const Text(
+                'Filter:',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: SingleChildScrollView(
@@ -190,22 +190,39 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       builder: (context, userProvider, _) {
         final users = userProvider.users;
         final adminCount = users.where((u) => u.role == 'admin').length;
-        final participantCount = users.where((u) => u.role == 'participant').length;
+        final participantCount = users
+            .where((u) => u.role == 'participant')
+            .length;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
               Expanded(
-                child: _buildStatCard('Total Users', users.length.toString(), Icons.people, AppColors.primary),
+                child: _buildStatCard(
+                  'Total Users',
+                  users.length.toString(),
+                  Icons.people,
+                  AppColors.primary,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard('Admins', adminCount.toString(), Icons.admin_panel_settings, Colors.orange),
+                child: _buildStatCard(
+                  'Admins',
+                  adminCount.toString(),
+                  Icons.admin_panel_settings,
+                  Colors.orange,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard('Participants', participantCount.toString(), Icons.person, Colors.green),
+                child: _buildStatCard(
+                  'Participants',
+                  participantCount.toString(),
+                  Icons.person,
+                  Colors.green,
+                ),
               ),
             ],
           ),
@@ -214,7 +231,12 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -263,21 +285,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         final users = userProvider.users;
 
         if (users.isEmpty) {
-          return SliverToBoxAdapter(
-            child: _buildEmptyState(),
-          );
+          return SliverToBoxAdapter(child: _buildEmptyState());
         }
 
         return SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
           sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final user = users[index];
-                return _buildUserCard(user);
-              },
-              childCount: users.length,
-            ),
+            delegate: SliverChildBuilderDelegate((context, index) {
+              final user = users[index];
+              return _buildUserCard(user);
+            }, childCount: users.length),
           ),
         );
       },
@@ -286,7 +303,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
 
   Widget _buildUserCard(User user) {
     final isAdmin = user.role == 'admin';
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -312,7 +329,9 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 // Avatar
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: isAdmin ? Colors.orange.shade100 : AppColors.primary.withValues(alpha: 0.1),
+                  backgroundColor: isAdmin
+                      ? Colors.orange.shade100
+                      : AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
                     user.name.substring(0, 1).toUpperCase(),
                     style: TextStyle(
@@ -323,7 +342,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                
+
                 // User Info
                 Expanded(
                   child: Column(
@@ -342,9 +361,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: isAdmin ? Colors.orange.withValues(alpha: 0.1) : Colors.green.withValues(alpha: 0.1),
+                              color: isAdmin
+                                  ? Colors.orange.withValues(alpha: 0.1)
+                                  : Colors.green.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -361,12 +385,19 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(Icons.email_outlined, size: 14, color: AppColors.gray600),
+                          Icon(
+                            Icons.email_outlined,
+                            size: 14,
+                            color: AppColors.gray600,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               user.email,
-                              style: TextStyle(color: AppColors.gray600, fontSize: 13),
+                              style: TextStyle(
+                                color: AppColors.gray600,
+                                fontSize: 13,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -376,11 +407,18 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.phone_outlined, size: 14, color: AppColors.gray600),
+                            Icon(
+                              Icons.phone_outlined,
+                              size: 14,
+                              color: AppColors.gray600,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               user.phone!,
-                              style: TextStyle(color: AppColors.gray600, fontSize: 13),
+                              style: TextStyle(
+                                color: AppColors.gray600,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
@@ -388,7 +426,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(width: 8),
                 Icon(Icons.chevron_right, color: AppColors.gray400),
               ],
@@ -409,7 +447,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
           const SizedBox(height: 16),
           Text(
             'No Users Found',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.gray600),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.gray600,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -427,9 +469,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   void _navigateToUserDetail(User user) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => UserDetailScreen(user: user),
-      ),
+      MaterialPageRoute(builder: (context) => UserDetailScreen(user: user)),
     ).then((result) {
       // Always reload after returning from detail screen
       _loadUsers();
@@ -439,9 +479,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   void _showAddUserDialog() {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const UserDetailScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const UserDetailScreen()),
     ).then((result) {
       if (result == true) {
         _loadUsers();
