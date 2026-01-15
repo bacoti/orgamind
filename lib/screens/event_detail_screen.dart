@@ -8,7 +8,6 @@ import '../providers/auth_provider.dart';
 import '../providers/event_provider.dart';
 import '../services/auth_service.dart';
 import '../models/event_model.dart';
-import 'edit_event_screen.dart';
 import 'invite_participants_screen.dart';
 import 'participant_list_screen.dart';
 
@@ -149,84 +148,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                     ),
                   ),
                 ),
-                actions: [
-                  if (isAdmin) ...[
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: CircleAvatar(
-                        backgroundColor: _isScrolled
-                            ? Colors.white
-                            : Colors.black.withOpacity(0.3),
-                        child: IconButton(
-                          tooltip: 'Edit',
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    EditEventScreen(event: widget.event),
-                              ),
-                            ).then((result) {
-                              if (result == true) Navigator.pop(context, true);
-                            });
-                          },
-                          icon: Icon(
-                            Icons.edit_rounded,
-                            color: _isScrolled
-                                ? AppColors.primary
-                                : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 8,
-                      ),
-                      child: CircleAvatar(
-                        backgroundColor: _isScrolled
-                            ? Colors.white
-                            : Colors.black.withOpacity(0.3),
-                        child: IconButton(
-                          tooltip: 'Delete',
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (ctx) => AlertDialog(
-                                title: const Text('Hapus Acara'),
-                                content: const Text(
-                                  'Yakin ingin menghapus acara ini?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.of(ctx).pop(),
-                                    child: const Text('Batal'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(ctx).pop();
-                                      Navigator.of(context).pop(true);
-                                    },
-                                    child: const Text(
-                                      'Hapus',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          icon: Icon(
-                            Icons.delete_outline_rounded,
-                            color: _isScrolled ? Colors.red : Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
                 flexibleSpace: FlexibleSpaceBar(
                   background: Stack(
                     fit: StackFit.expand,

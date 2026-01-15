@@ -177,7 +177,7 @@ class _ReportScreenState extends State<ReportScreen>
         icon: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
@@ -192,7 +192,7 @@ class _ReportScreenState extends State<ReportScreen>
               end: Alignment.bottomRight,
               colors: [
                 AppColors.primary,
-                AppColors.primary.withOpacity(0.7),
+                AppColors.primary.withValues(alpha: 0.7),
               ],
             ),
           ),
@@ -207,7 +207,7 @@ class _ReportScreenState extends State<ReportScreen>
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Icon(
@@ -234,7 +234,7 @@ class _ReportScreenState extends State<ReportScreen>
                               'Periode: ${DateFormat('dd MMM').format(_startDate)} - ${DateFormat('dd MMM yyyy').format(_endDate)}',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withValues(alpha: 0.9),
                               ),
                             ),
                           ],
@@ -253,7 +253,7 @@ class _ReportScreenState extends State<ReportScreen>
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.date_range, color: Colors.white, size: 20),
@@ -265,7 +265,7 @@ class _ReportScreenState extends State<ReportScreen>
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.share, color: Colors.white, size: 20),
@@ -376,7 +376,7 @@ class _ReportScreenState extends State<ReportScreen>
         }
       },
       backgroundColor: Colors.white,
-      selectedColor: AppColors.primary.withOpacity(0.2),
+      selectedColor: AppColors.primary.withValues(alpha: 0.2),
       checkmarkColor: AppColors.primary,
       labelStyle: TextStyle(
         color: isSelected ? AppColors.primary : Colors.grey[700],
@@ -459,7 +459,7 @@ class _ReportScreenState extends State<ReportScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -474,7 +474,7 @@ class _ReportScreenState extends State<ReportScreen>
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -519,7 +519,7 @@ class _ReportScreenState extends State<ReportScreen>
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: AppColors.primary, size: 20),
@@ -562,7 +562,7 @@ class _ReportScreenState extends State<ReportScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -614,7 +614,7 @@ class _ReportScreenState extends State<ReportScreen>
                               end: Alignment.topCenter,
                               colors: [
                                 AppColors.primary,
-                                AppColors.primary.withOpacity(0.7),
+                                AppColors.primary.withValues(alpha: 0.7),
                               ],
                             ),
                             borderRadius: BorderRadius.circular(6),
@@ -688,7 +688,7 @@ class _ReportScreenState extends State<ReportScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -857,9 +857,9 @@ class _ReportScreenState extends State<ReportScreen>
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -867,7 +867,7 @@ class _ReportScreenState extends State<ReportScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -1004,9 +1004,9 @@ class _ReportScreenState extends State<ReportScreen>
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -1041,7 +1041,7 @@ class _ReportScreenState extends State<ReportScreen>
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -1055,8 +1055,8 @@ class _ReportScreenState extends State<ReportScreen>
             padding: const EdgeInsets.symmetric(vertical: 8),
             decoration: BoxDecoration(
               color: isUpcoming
-                  ? AppColors.primary.withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.1),
+                  ? AppColors.primary.withValues(alpha: 0.1)
+                  : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -1135,7 +1135,7 @@ class _ReportScreenState extends State<ReportScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: isUpcoming ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+              color: isUpcoming ? Colors.green.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -1219,7 +1219,7 @@ class _ReportScreenState extends State<ReportScreen>
           end: Alignment.bottomRight,
           colors: [
             Colors.green,
-            Colors.green.withOpacity(0.7),
+            Colors.green.withValues(alpha: 0.7),
           ],
         ),
         borderRadius: BorderRadius.circular(16),
@@ -1237,7 +1237,7 @@ class _ReportScreenState extends State<ReportScreen>
               Container(
                 width: 1,
                 height: 50,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
               ),
               _buildOverviewItem(
                 avgPerEvent,
@@ -1247,7 +1247,7 @@ class _ReportScreenState extends State<ReportScreen>
               Container(
                 width: 1,
                 height: 50,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
               ),
               _buildOverviewItem(
                 capacity.toString(),
@@ -1264,7 +1264,7 @@ class _ReportScreenState extends State<ReportScreen>
   Widget _buildOverviewItem(String value, String label, IconData icon) {
     return Column(
       children: [
-        Icon(icon, color: Colors.white.withOpacity(0.8), size: 24),
+        Icon(icon, color: Colors.white.withValues(alpha: 0.8), size: 24),
         const SizedBox(height: 8),
         Text(
           value,
@@ -1278,7 +1278,7 @@ class _ReportScreenState extends State<ReportScreen>
           label,
           style: TextStyle(
             fontSize: 11,
-            color: Colors.white.withOpacity(0.9),
+            color: Colors.white.withValues(alpha: 0.9),
           ),
           textAlign: TextAlign.center,
         ),
@@ -1301,7 +1301,7 @@ class _ReportScreenState extends State<ReportScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1356,7 +1356,7 @@ class _ReportScreenState extends State<ReportScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: utilizationColor.withOpacity(0.1),
+              color: utilizationColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -1398,7 +1398,7 @@ class _ReportScreenState extends State<ReportScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1446,7 +1446,7 @@ class _ReportScreenState extends State<ReportScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -1482,7 +1482,7 @@ class _ReportScreenState extends State<ReportScreen>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -1501,7 +1501,7 @@ class _ReportScreenState extends State<ReportScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -1609,7 +1609,7 @@ class _ReportScreenState extends State<ReportScreen>
       ),
     );
 
-    if (result != null) {
+    if (result != null && mounted) {
       setState(() {
         _startDate = result['start']!;
         _endDate = result['end']!;
@@ -1679,7 +1679,7 @@ class _PeriodSelectorSheetState extends State<_PeriodSelectorSheet> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(Icons.date_range, color: AppColors.primary),

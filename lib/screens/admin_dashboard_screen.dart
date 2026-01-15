@@ -120,8 +120,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               end: Alignment.bottomRight,
               colors: [
                 AppColors.primary,
-                AppColors.primary.withOpacity(0.8),
-                AppColors.primary.withOpacity(0.6),
+                AppColors.primary.withValues(alpha: 0.8),
+                AppColors.primary.withValues(alpha: 0.6),
               ],
             ),
           ),
@@ -130,6 +130,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Top Row: Profile & Actions
                   Row(
@@ -157,12 +158,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     shape: BoxShape.circle,
                                     color: Colors.white,
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.5),
+                                      color: Colors.white.withValues(alpha: 0.5),
                                       width: 2,
                                     ),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
+                                        color: Colors.black.withValues(alpha: 0.1),
                                         blurRadius: 8,
                                         offset: const Offset(0, 2),
                                       ),
@@ -185,12 +186,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               const SizedBox(width: 12),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     _getGreeting(),
                                     style: TextStyle(
                                       fontSize: 13,
-                                      color: Colors.white.withOpacity(0.9),
+                                      color: Colors.white.withValues(alpha: 0.9),
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -211,25 +213,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       // Action Buttons
                       Row(
                         children: [
-                          _buildAppBarAction(
-                            Icons.notifications_outlined,
-                            () {
-                              final eventProvider = Provider.of<EventProvider>(
-                                context,
-                                listen: false,
-                              );
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NotificationScreen(
-                                    // Hapus parameter events: eventProvider.events jika error, 
-                                    // karena NotificationScreen mengambil data sendiri sekarang.
-                                  ),
+                          _buildAppBarAction(Icons.notifications_outlined, () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => NotificationScreen(
+                                  // Hapus parameter events: eventProvider.events jika error,
+                                  // karena NotificationScreen mengambil data sendiri sekarang.
                                 ),
-                              );
-                            },
-                            badge: 3, 
-                          ),
+                              ),
+                            );
+                          }, badge: 3),
                           const SizedBox(width: 8),
                           _buildAppBarAction(
                             Icons.settings_outlined,
@@ -244,7 +238,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                     ],
                   ),
-                  const Spacer(),
                   // Bottom: Date & Role Badge
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -252,6 +245,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -259,7 +253,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -287,14 +281,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             children: [
                               Icon(
                                 Icons.calendar_today,
-                                color: Colors.white.withOpacity(0.8),
+                                color: Colors.white.withValues(alpha: 0.8),
                                 size: 14,
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 _getTodayDate(),
                                 style: TextStyle(
-                                  color: Colors.white.withOpacity(0.9),
+                                  color: Colors.white.withValues(alpha: 0.9),
                                   fontSize: 12,
                                 ),
                               ),
@@ -327,7 +321,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Stack(
@@ -368,15 +362,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
         final events = eventProvider.events;
+        final now = DateTime.now();
         final upcomingEvents = events
-            .where((e) => e.date.isAfter(DateTime.now()))
+            .where((e) => e.effectiveEndDateTime.isAfter(now))
             .length;
         final todayEvents = events
             .where(
               (e) =>
-                  e.date.year == DateTime.now().year &&
-                  e.date.month == DateTime.now().month &&
-                  e.date.day == DateTime.now().day,
+                  e.date.year == now.year &&
+                  e.date.month == now.month &&
+                  e.date.day == now.day,
             )
             .length;
 
@@ -392,7 +387,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -444,7 +439,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -465,11 +460,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Consumer<EventProvider>(
       builder: (context, eventProvider, _) {
         final events = eventProvider.events;
+        final now = DateTime.now();
         final upcomingEvents = events
-            .where((e) => e.date.isAfter(DateTime.now()))
+            .where((e) => e.effectiveEndDateTime.isAfter(now))
             .toList();
         final pastEvents = events
-            .where((e) => e.date.isBefore(DateTime.now()))
+            .where((e) => !e.effectiveEndDateTime.isAfter(now))
             .toList();
         final totalParticipants = events.fold(
           0,
@@ -494,7 +490,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -525,7 +521,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Semua'),
                         ),
                       ),
                     ),
@@ -541,7 +538,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Mendatang'),
                         ),
                       ),
                     ),
@@ -561,7 +559,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const EventListScreen(),
+                          builder: (context) =>
+                              const EventListScreen(initialFilter: 'Selesai'),
                         ),
                       ),
                     ),
@@ -613,12 +612,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(color: color.withOpacity(0.1), width: 1),
+          border: Border.all(color: color.withValues(alpha: 0.1), width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,7 +628,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 22),
@@ -683,7 +682,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
+                  color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -789,10 +788,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withOpacity(0.2), width: 1),
+            border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.08),
+                color: color.withValues(alpha: 0.08),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -805,12 +804,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.7)],
+                    colors: [color, color.withValues(alpha: 0.7)],
                   ),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
                     BoxShadow(
-                      color: color.withOpacity(0.3),
+                      color: color.withValues(alpha: 0.3),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -851,7 +850,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -888,6 +887,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // ==================== FLOATING ACTION BUTTON ====================
   Widget _buildFAB() {
     return FloatingActionButton.extended(
+      heroTag: 'admin_dashboard_fab',
       onPressed: _handleCreateEvent,
       backgroundColor: AppColors.primary,
       elevation: 4,
@@ -929,19 +929,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           if (events.isEmpty) {
             // --- FIX: MENGHAPUS BOX BESAR "BELUM ADA EVENT" ---
             // Kita ganti dengan SizedBox.shrink() agar kosong/bersih
-            return const SliverToBoxAdapter(child: SizedBox.shrink()); 
+            return const SliverToBoxAdapter(child: SizedBox.shrink());
           }
 
           return SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final event = events[index];
-                  return _buildEnhancedEventCard(event, index);
-                },
-                childCount: events.length > 5 ? 5 : events.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final event = events[index];
+                return _buildEnhancedEventCard(event, index);
+              }, childCount: events.length > 5 ? 5 : events.length),
             ),
           );
         } catch (e) {
@@ -960,8 +957,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildEnhancedEventCard(EventModel event, int index) {
-    final isUpcoming = event.date.isAfter(DateTime.now());
-    final daysUntil = event.date.difference(DateTime.now()).inDays;
+    final now = DateTime.now();
+    final isUpcoming = event.effectiveEndDateTime.isAfter(now);
+    final daysUntil = event.startDateTime.isAfter(now)
+        ? event.startDateTime.difference(now).inDays
+        : 0;
     final participantPercentage = event.capacity > 0
         ? ((event.participantsCount ?? 0) / event.capacity * 100).clamp(0, 100)
         : 0.0;
@@ -973,7 +973,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1005,9 +1005,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               colors: isUpcoming
                                   ? [
                                       AppColors.primary,
-                                      AppColors.primary.withOpacity(0.7),
+                                      AppColors.primary.withValues(alpha: 0.7),
                                     ]
-                                  : [Colors.grey, Colors.grey.withOpacity(0.7)],
+                                  : [Colors.grey, Colors.grey.withValues(alpha: 0.7)],
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1045,7 +1045,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.1),
+                                    color: AppColors.primary.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
@@ -1071,8 +1071,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: isUpcoming
-                                    ? Colors.green.withOpacity(0.1)
-                                    : Colors.grey.withOpacity(0.1),
+                                    ? Colors.green.withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Row(
@@ -1091,10 +1091,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                   Text(
                                     isUpcoming
                                         ? daysUntil == 0
-                                            ? 'Hari Ini'
-                                            : daysUntil == 1
-                                                ? 'Besok'
-                                                : '$daysUntil hari lagi'
+                                              ? 'Hari Ini'
+                                              : daysUntil == 1
+                                              ? 'Besok'
+                                              : '$daysUntil hari lagi'
                                         : 'Selesai',
                                     style: TextStyle(
                                       color: isUpcoming
@@ -1192,7 +1192,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                     gradient: LinearGradient(
                                       colors: [
                                         AppColors.primary,
-                                        AppColors.primary.withOpacity(0.7),
+                                        AppColors.primary.withValues(alpha: 0.7),
                                       ],
                                     ),
                                     borderRadius: BorderRadius.circular(3),
@@ -1258,21 +1258,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     String text, {
     bool expanded = false,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min, // Agar Row sepadat mungkin
-      children: [
-        Icon(icon, size: 14, color: Colors.grey[600]),
-        const SizedBox(width: 6),
-        // Logika Expanded dipindah ke SINI (hanya untuk Text)
-        expanded
-            ? Expanded(
-                child: Text(
-                  text,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
-                  overflow: TextOverflow.ellipsis,
+    return expanded
+        ? Expanded(
+            child: Row(
+              children: [
+                Icon(icon, size: 14, color: Colors.grey[600]),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              )
-            : Text(
+              ],
+            ),
+          )
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: Colors.grey[600]),
+              const SizedBox(width: 6),
+              Text(
                 text,
                 style: TextStyle(fontSize: 12, color: Colors.grey[700]),
               ),
@@ -1297,11 +1304,82 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color, size: 18),
         ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.event_busy,
+              size: 60,
+              color: AppColors.primary.withOpacity(0.5),
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Belum Ada Event',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Mulai dengan membuat event pertama Anda\nuntuk mengelola kegiatan organisasi',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: _handleCreateEvent,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            icon: const Icon(Icons.add),
+            label: const Text(
+              'Buat Event Pertama',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -1418,7 +1496,7 @@ Ayo bergabung! 👋
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(Icons.event, color: AppColors.primary),
@@ -1556,7 +1634,7 @@ Ayo bergabung! 👋
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icon, color: color, size: 20),
@@ -1605,7 +1683,7 @@ Ayo bergabung! 👋
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

@@ -8,6 +8,7 @@ import '../constants/strings.dart';
 import 'profile_screen.dart';
 import 'event_list_screen.dart'; // Pastikan import ini ada
 import 'qr_scan_screen.dart';
+import 'participant_history_screen.dart';
 import 'user_management_screen.dart';
 import 'admin_dashboard_screen.dart';
 import '../providers/auth_provider.dart';
@@ -93,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return [
       EventListScreen(),
       const QrScanScreen(),
-      const Center(child: Text('Check-in History Screen')),
+      const ParticipantHistoryScreen(),
       const ProfileScreen(),
     ];
   }
